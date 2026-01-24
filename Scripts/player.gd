@@ -229,12 +229,9 @@ func _physics_process(delta: float) -> void:
 	
 	# Gun shooting
 	if is_gun_equipped and Input.is_action_pressed("shoot") and gun and gun.has_method("shoot"):
-		# Calculate shooting direction (Camera Forward)
-		var shoot_dir = cam_forward_flat
-		if cam:
-			shoot_dir = - cam.global_transform.basis.z
-		
-		gun.shoot(shoot_dir)
+		# Calculate shooting direction (Camera Forward - Horizontal only)
+		# Use the flattened forward vector we calculated earlier for movement
+		gun.shoot(cam_forward_flat)
 		
 		# Trigger shoot animation
 		if anim_tree and anim_tree.active:
