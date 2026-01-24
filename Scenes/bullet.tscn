@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://dyd3f3tg58d1e"]
+
+[ext_resource type="PackedScene" uid="uid://67e2pod6ptqn" path="res://Asset/Guns/bullet-foam-tip-thick.glb" id="1_xjght"]
+
+[node name="Bullet" type="Node3D"]
+
+[node name="bullet-foam-tip-thick2" parent="." instance=ExtResource("1_xjght")]
+transform = Transform3D(-4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0, 0, 1, -0.01972004, 0, 0)

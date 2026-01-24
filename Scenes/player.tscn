@@ -1,7 +1,8 @@
-[gd_scene load_steps=45 format=4 uid="uid://cg7ksch5fwadp"]
+[gd_scene load_steps=46 format=4 uid="uid://cg7ksch5fwadp"]
 
 [ext_resource type="Script" uid="uid://iwsato2uxrlv" path="res://Scripts/player.gd" id="1_6t5aa"]
 [ext_resource type="Texture2D" uid="uid://b5uohb1lwlqhh" path="res://Asset/Textures/colormap.png" id="1_cvnsp"]
+[ext_resource type="PackedScene" uid="uid://bqporps6s78hu" path="res://Scenes/gun.tscn" id="2_6t5aa"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_c204s"]
 resource_name = "colormap"
@@ -1879,6 +1880,13 @@ script = ExtResource("1_6t5aa")
 
 [node name="CharacterBody3D" type="CharacterBody3D" parent="."]
 
+[node name="Marker3D" type="Marker3D" parent="CharacterBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.16638644, 0.6336821, 0.2771029)
+
+[node name="Gun" parent="CharacterBody3D" instance=ExtResource("2_6t5aa")]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -0.16638644, 0.6336821, 0.2771029)
+visible = false
+
 [node name="Skeleton3D" type="Skeleton3D" parent="CharacterBody3D"]
 bones/0/name = "figurine"
 bones/0/parent = -1
@@ -1913,28 +1921,28 @@ bones/4/parent = 1
 bones/4/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
 bones/4/enabled = true
 bones/4/position = Vector3(0, 0.25, 0)
-bones/4/rotation = Quaternion(0, 0, 0, 1)
+bones/4/rotation = Quaternion(-0.009629384, 0, 0, 0.9999536)
 bones/4/scale = Vector3(1, 1, 1)
 bones/5/name = "arm-left"
 bones/5/parent = 4
 bones/5/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.2, 5.6229803e-09)
 bones/5/enabled = true
 bones/5/position = Vector3(0.2, 0.2, 5.6229803e-09)
-bones/5/rotation = Quaternion(0, 0, 0, 1)
+bones/5/rotation = Quaternion(-0.028884599, 0, 0, 0.99958277)
 bones/5/scale = Vector3(1, 1, 1)
 bones/6/name = "arm-right"
 bones/6/parent = 4
 bones/6/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0.2, -2.945491e-09)
 bones/6/enabled = true
 bones/6/position = Vector3(-0.2, 0.2, -2.945491e-09)
-bones/6/rotation = Quaternion(0, 0, 0, 1)
+bones/6/rotation = Quaternion(-0.028884599, 0, 0, 0.99958277)
 bones/6/scale = Vector3(1, 1, 1)
 bones/7/name = "head"
 bones/7/parent = 4
 bones/7/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
 bones/7/enabled = true
 bones/7/position = Vector3(0, 0.25, 0)
-bones/7/rotation = Quaternion(0, 0, 0, 1)
+bones/7/rotation = Quaternion(0, 0.028884599, 0, 0.99958277)
 bones/7/scale = Vector3(1, 1, 1)
 
 [node name="leg-left" type="BoneAttachment3D" parent="CharacterBody3D/Skeleton3D"]
@@ -1956,7 +1964,7 @@ mesh = SubResource("ArrayMesh_ubl8f")
 skeleton = NodePath("")
 
 [node name="torso" type="BoneAttachment3D" parent="CharacterBody3D/Skeleton3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+transform = Transform3D(1, 0, 0, 0, 0.99981457, 0.019257875, 0, -0.019257875, 0.99981457, 0, 0.25, 0)
 bone_name = "torso"
 bone_idx = 4
 
@@ -1965,7 +1973,7 @@ mesh = SubResource("ArrayMesh_c878f")
 skeleton = NodePath("")
 
 [node name="arm-left" type="BoneAttachment3D" parent="CharacterBody3D/Skeleton3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.45, 5.6229803e-09)
+transform = Transform3D(1, 0, 0, 0, 0.9970342, 0.07696013, 0, -0.07696013, 0.9970342, 0.2, 0.4499629, -0.0038515695)
 bone_name = "arm-left"
 bone_idx = 5
 
@@ -1974,7 +1982,7 @@ mesh = SubResource("ArrayMesh_qe6la")
 skeleton = NodePath("")
 
 [node name="arm-right" type="BoneAttachment3D" parent="CharacterBody3D/Skeleton3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0.45, -2.945491e-09)
+transform = Transform3D(1, 0, 0, 0, 0.9970342, 0.07696013, 0, -0.07696013, 0.9970342, -0.2, 0.4499629, -0.003851578)
 bone_name = "arm-right"
 bone_idx = 6
 
@@ -1983,7 +1991,7 @@ mesh = SubResource("ArrayMesh_0mbce")
 skeleton = NodePath("")
 
 [node name="head" type="BoneAttachment3D" parent="CharacterBody3D/Skeleton3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+transform = Transform3D(0.99833137, 0, 0.057745095, -0.0011120478, 0.99981457, 0.01922574, -0.05773439, -0.019257875, 0.99814624, 0, 0.49995363, -0.004814469)
 bone_name = "head"
 bone_idx = 7
 
