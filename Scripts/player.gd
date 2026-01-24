@@ -10,17 +10,42 @@ extends Node3D
 @export var air_control: float = 0.3
 @export var rotation_speed: float = 10.0
 
+@export_group("Camera")
+@export var camera_distance: float = 8.0
+@export var camera_height: float = 6.0
+@export var camera_angle: float = -45.0 # Base isometric angle in degrees
+@export var camera_smoothness: float = 5.0
+@export var mouse_sensitivity: float = 0.3 # Mouse rotation sensitivity
+@export var vertical_limit: float = 15.0 # Max degrees up/down from base angle
+
 # --- Nodes ---
 @onready var character_body: CharacterBody3D = $CharacterBody3D
 @onready var anim_player: AnimationPlayer = $CharacterBody3D/AnimationPlayer
+@onready var skeleton: Skeleton3D = $CharacterBody3D/Skeleton3D
+
+# Camera pivot nodes (will be set from player scene)
+var camera_pivot: Node3D = null
+var camera: Camera3D = null
+
+# --- Camera State ---
+var _camera_yaw: float = 0.0 # Horizontal rotation
+var _camera_pitch: float = 0.0 # Vertical rotation (limited)
 
 # --- State ---
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 func _ready() -> void:
 	_setup_inputs()
-	# Optional: Capture mouse if you still want to hide the cursor, 
-	# otherwise you can remove this or set to VISIBLE.
+	
+	# Find camera nodes within the player scene
+	camera_pivot = character_body.get_node_or_null("CameraPivot")
+	if camera_pivot:
+		camera = camera_pivot.get_node_or_null("Camera3D")
+	
+	if not camera or not camera_pivot:
+		push_warning("Camera setup not found! Make sure CharacterBody3D/CameraPivot/Camera3D exists")
+	
+	# Capture mouse for Tacticool-style aiming
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 func _physics_process(delta: float) -> void:
@@ -41,10 +66,13 @@ func _physics_process(delta: float) -> void:
 	
 	if cam:
 		# Calculate direction relative to Camera
-		var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+		# IMPORTANT: get_vector returns (param1-param2, param3-param4)
+		# So for forward/back to work correctly with camera basis, we need move_back first, then move_forward
+		var input_dir := Input.get_vector("move_left", "move_right", "move_back", "move_forward")
 		
 		var cam_basis = cam.global_transform.basis
-		var forward = cam_basis.z
+		# In Godot, basis.z points BACKWARD, so we negate it to get forward
+		var forward = - cam_basis.z
 		var right = cam_basis.x
 		
 		# Flatten vectors
@@ -70,11 +98,20 @@ func _physics_process(delta: float) -> void:
 		character_body.velocity.z = move_toward(character_body.velocity.z, target_vel_z, accel * delta)
 		
 		# --- Rotation (Face Movement Direction) ---
-		# Get target rotation angle
-		var target_angle = atan2(direction.x, direction.z)
-		# Smoothly interpolate current rotation to target rotation
-		var current_angle = rotation.y
-		rotation.y = lerp_angle(current_angle, target_angle, rotation_speed * delta)
+		# Only rotate when moving forward or sideways, not when backpedaling
+		# Check if we're moving more forward than backward
+		var camera_ref = get_viewport().get_camera_3d()
+		if camera_ref:
+			var cam_forward = - camera_ref.global_transform.basis.z
+			cam_forward.y = 0
+			cam_forward = cam_forward.normalized()
+			var move_dot = direction.dot(cam_forward)
+			
+			# Only rotate if moving forward or sideways (not backward)
+			if move_dot > -0.3: # Allow slight backward movement before stopping rotation
+				var target_angle = atan2(direction.x, direction.z)
+				var current_angle = skeleton.rotation.y
+				skeleton.rotation.y = lerp_angle(current_angle, target_angle, rotation_speed * delta)
 		
 	else:
 		character_body.velocity.x = move_toward(character_body.velocity.x, 0, fric * delta)
@@ -92,6 +129,9 @@ func _physics_process(delta: float) -> void:
 		global_position = target_global_pos
 		character_body.position = Vector3.ZERO
 
+	# --- Camera Follow ---
+	_update_camera(direction, delta)
+	
 	# --- Animations ---
 	_update_animations(direction)
 
@@ -108,14 +148,35 @@ func _update_animations(direction: Vector3) -> void:
 	else:
 		if anim_player.current_animation != "idle":
 			anim_player.play("idle", 0.2)
-			
+
+func _update_camera(_direction: Vector3, _delta: float) -> void:
+	if not camera_pivot or not camera:
+		return
+	
+	# Apply horizontal rotation to camera pivot (yaw)
+	camera_pivot.rotation.y = _camera_yaw
+	
+	# Apply vertical rotation to camera (pitch) - limited range
+	var base_pitch = deg_to_rad(camera_angle)
+	var pitch_offset = deg_to_rad(_camera_pitch)
+	camera.rotation.x = base_pitch + pitch_offset
+
 func _unhandled_input(event: InputEvent) -> void:
-	# Keep escape to uncapture mouse just in case
+	# Handle mouse motion for camera rotation (Tacticool-style aiming)
+	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		# Accumulate rotation based on mouse movement
+		_camera_yaw -= event.relative.x * mouse_sensitivity * 0.01 # Horizontal rotation (left/right)
+		_camera_pitch -= event.relative.y * mouse_sensitivity * 0.01 # Vertical rotation (up/down)
+		
+		# Clamp vertical rotation to limited range
+		_camera_pitch = clamp(_camera_pitch, -vertical_limit, vertical_limit)
+	
+	# Toggle mouse mode with Escape
 	if event.is_action_pressed("ui_cancel"):
-		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-		else:
+		if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		else:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 func _setup_inputs() -> void:
 	if not InputMap.has_action("move_forward"): _add_key_action("move_forward", KEY_W)

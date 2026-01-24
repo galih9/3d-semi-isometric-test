@@ -1879,9 +1879,6 @@ script = ExtResource("1_6t5aa")
 
 [node name="CharacterBody3D" type="CharacterBody3D" parent="."]
 
-[node name="Camera3D" type="Camera3D" parent="CharacterBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 2)
-
 [node name="Skeleton3D" type="Skeleton3D" parent="CharacterBody3D"]
 bones/0/name = "figurine"
 bones/0/parent = -1
@@ -2002,3 +1999,14 @@ libraries = {
 [node name="CollisionShape3D" type="CollisionShape3D" parent="CharacterBody3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.36505127, 0)
 shape = SubResource("CapsuleShape3D_vgqql")
+
+[node name="RemoteTransform3D" type="RemoteTransform3D" parent="CharacterBody3D"]
+remote_path = NodePath("../CameraPivot")
+update_rotation = false
+
+[node name="CameraPivot" type="Node3D" parent="CharacterBody3D"]
+
+[node name="Camera3D" type="Camera3D" parent="CharacterBody3D/CameraPivot"]
+transform = Transform3D(-1, 2.1073431e-08, -2.1073431e-08, 0, 0.7071068, 0.7071068, 2.980233e-08, 0.7071068, -0.7071068, 0, 4, -2)
+current = true
+fov = 60.0
