@@ -1,7 +1,18 @@
-[gd_scene load_steps=2 format=3 uid="uid://bqporps6s78hu"]
+[gd_scene load_steps=4 format=3 uid="uid://bqporps6s78hu"]
 
 [ext_resource type="PackedScene" uid="uid://b8d8mf1g1vdc5" path="res://Asset/Guns/blaster-b.glb" id="1_nxj5y"]
+[ext_resource type="Texture2D" uid="uid://ceoflfuawijyn" path="res://Asset/Guns/Sprites/burst.png" id="2_muzzle"]
+[ext_resource type="Script" uid="uid://c3xb5ligyglb4" path="res://Scripts/gun.gd" id="3_gun_script"]
 
 [node name="Gun" type="Node3D"]
+script = ExtResource("3_gun_script")
 
 [node name="Blaster" parent="." instance=ExtResource("1_nxj5y")]
+
+[node name="Muzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.3)
+
+[node name="MuzzleFlash" type="Sprite3D" parent="Muzzle"]
+transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
+billboard = 1
+texture = ExtResource("2_muzzle")
