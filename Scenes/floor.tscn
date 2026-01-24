@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://hpf3jmerk2t4"]
+
+[ext_resource type="PackedScene" uid="uid://c2673gcbedhup" path="res://Asset/floor-square.glb" id="1_nvnu3"]
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_agfsv"]
+data = PackedVector3Array(0, 0, 0, 0.5, 0, 0, 0.5, 0, 0.5, 0.5, 0, 0.5, 0, 0, 0.5, 0, 0, 0, 0, 0, 0, -0.5, 0, 0, -0.5, 0, -0.5, -0.5, 0, -0.5, 0, 0, -0.5, 0, 0, 0, 0, 0, -0.5, 0.5, 0, -0.5, 0.5, 0, 0, 0.5, 0, 0, 0, 0, 0, 0, 0, -0.5, -0.5, 0, 0, 0, 0, 0, 0, 0, 0.5, 0, 0, 0.5, -0.5, 0, 0.5, -0.5, 0, 0)
+
+[node name="Floor" instance=ExtResource("1_nvnu3")]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="floor-square" index="0"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="floor-square/StaticBody3D" index="0"]
+shape = SubResource("ConcavePolygonShape3D_agfsv")
