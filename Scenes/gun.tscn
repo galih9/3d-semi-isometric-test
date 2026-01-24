@@ -1,8 +1,22 @@
-[gd_scene load_steps=4 format=3 uid="uid://bqporps6s78hu"]
+[gd_scene load_steps=7 format=3 uid="uid://bqporps6s78hu"]
 
 [ext_resource type="PackedScene" uid="uid://b8d8mf1g1vdc5" path="res://Asset/Guns/blaster-b.glb" id="1_nxj5y"]
-[ext_resource type="Texture2D" uid="uid://ceoflfuawijyn" path="res://Asset/Guns/Sprites/burst.png" id="2_muzzle"]
 [ext_resource type="Script" uid="uid://c3xb5ligyglb4" path="res://Scripts/gun.gd" id="3_gun_script"]
+[ext_resource type="SpriteFrames" uid="uid://dbv3sy5qjatnl" path="res://Asset/Guns/Sprites/burst_animation.tres" id="3_t6ynv"]
+[ext_resource type="AudioStream" uid="uid://cytgskcl543cm" path="res://Asset/Audio/pistol_shoot.ogg" id="4_k4teu"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_laser"]
+transparency = 1
+albedo_color = Color(1, 0, 0, 0.470588)
+emission_enabled = true
+emission = Color(1, 0, 0, 1)
+emission_energy_multiplier = 5.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_laser"]
+material = SubResource("StandardMaterial3D_laser")
+top_radius = 0.005
+bottom_radius = 0.005
+height = 1.0
 
 [node name="Gun" type="Node3D"]
 script = ExtResource("3_gun_script")
@@ -12,7 +26,23 @@ script = ExtResource("3_gun_script")
 [node name="Muzzle" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.3)
 
-[node name="MuzzleFlash" type="Sprite3D" parent="Muzzle"]
-transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0)
+[node name="MuzzleFlash" type="AnimatedSprite3D" parent="Muzzle"]
+transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, -0.583272)
 billboard = 1
-texture = ExtResource("2_muzzle")
+sprite_frames = ExtResource("3_t6ynv")
+frame = 2
+frame_progress = 1.0
+
+[node name="RayCast3D" type="RayCast3D" parent="Muzzle"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.4673943)
+target_position = Vector3(0, 0, -50)
+
+[node name="Laser" type="MeshInstance3D" parent="Muzzle"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -1.0128187)
+cast_shadow = 0
+mesh = SubResource("CylinderMesh_laser")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_k4teu")
+
+[node name="Timer" type="Timer" parent="."]

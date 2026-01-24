@@ -6,11 +6,14 @@ extends Node3D
 
 # --- Nodes ---
 @onready var muzzle: Marker3D = $Muzzle
-@onready var muzzle_flash: Sprite3D = $Muzzle/MuzzleFlash
+@onready var muzzle_flash: AnimatedSprite3D = $Muzzle/MuzzleFlash
+@onready var ray_cast: RayCast3D = $Muzzle/RayCast3D
+@onready var laser_mesh: MeshInstance3D = $Muzzle/Laser
+@onready var audio_player: AudioStreamPlayer = $AudioStreamPlayer
+@onready var cooldown_timer: Timer = $Timer
 
 # --- State ---
 var can_shoot: bool = true
-var shoot_timer: float = 0.0
 
 func _ready() -> void:
 	# Hide muzzle flash initially
@@ -20,13 +23,16 @@ func _ready() -> void:
 	# Load bullet scene if not set
 	if not bullet_scene:
 		bullet_scene = load("res://Scenes/bullet.tscn")
+		
+	# Setup Timer
+	if cooldown_timer:
+		cooldown_timer.wait_time = fire_rate
+		cooldown_timer.one_shot = true
+		cooldown_timer.timeout.connect(_on_timer_timeout)
 
-func _process(delta: float) -> void:
-	# Handle shoot cooldown
-	if not can_shoot:
-		shoot_timer -= delta
-		if shoot_timer <= 0:
-			can_shoot = true
+func _process(_delta: float) -> void:
+	# Update Laser Sight
+	_update_laser()
 
 func shoot(aim_direction: Vector3 = Vector3.ZERO, _aim_origin: Vector3 = Vector3.ZERO) -> void:
 	if not can_shoot or not bullet_scene or not muzzle:
@@ -52,21 +58,48 @@ func shoot(aim_direction: Vector3 = Vector3.ZERO, _aim_origin: Vector3 = Vector3
 		# Fallback for old bullet scripts (compatibility)
 		bullet.global_transform = muzzle.global_transform
 
-	
 	# Show muzzle flash
 	_show_muzzle_flash()
 	
+	# Play Sound
+	if audio_player:
+		audio_player.play()
+	
 	# Start cooldown
 	can_shoot = false
-	shoot_timer = fire_rate
+	if cooldown_timer:
+		cooldown_timer.start()
+
+func _on_timer_timeout() -> void:
+	can_shoot = true
 
 func _show_muzzle_flash() -> void:
-	if not muzzle_flash:
-		return
-	
-	muzzle_flash.visible = true
-	
-	# Hide after a short delay
-	await get_tree().create_timer(0.05).timeout
 	if muzzle_flash:
-		muzzle_flash.visible = false
+		muzzle_flash.visible = true
+		muzzle_flash.frame = 0
+		muzzle_flash.play("default")
+		muzzle_flash.rotation_degrees.z = randf_range(-45, 45)
+		muzzle_flash.scale = Vector3.ONE * randf_range(0.40, 0.75)
+		
+		# Hide after a short delay
+		await get_tree().create_timer(0.05).timeout
+		if muzzle_flash:
+			muzzle_flash.visible = false
+
+func _update_laser() -> void:
+	if not ray_cast or not laser_mesh:
+		return
+		
+	var distance: float = 50.0 # Max range default
+	
+	# Check collision
+	if ray_cast.is_colliding():
+		var collision_point = ray_cast.get_collision_point()
+		distance = muzzle.global_position.distance_to(collision_point)
+	
+	# Note: Laser mesh is a cylinder with height 1.0 (centered)
+	# rotated -90 on X, so Y-axis points forward (-Z relative to Muzzle)
+	# We scale the Y axis to match distance
+	laser_mesh.scale.y = distance
+	# Move it forward by half the distance to start at muzzle
+	laser_mesh.position.z = - distance / 2.0
