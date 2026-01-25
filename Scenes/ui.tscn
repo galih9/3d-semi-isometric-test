@@ -60,6 +60,8 @@ offset_bottom = 648.0
 layout_mode = 2
 text = "Prototyping features
 Press 1 to respawn the enemy
+Press E to switch equip/unequip
+Press Q to switch weapons
 "
 horizontal_alignment = 2
 

@@ -17,6 +17,7 @@ signal reload_finished
 @onready var laser_mesh: MeshInstance3D = $Muzzle/Laser
 @onready var audio_player: AudioStreamPlayer = $AudioStreamPlayer
 @onready var cooldown_timer: Timer = $Timer
+var reload_audio: AudioStreamPlayer
 
 # --- State ---
 var can_shoot: bool = true
@@ -37,6 +38,8 @@ func _ready() -> void:
 		cooldown_timer.wait_time = fire_rate
 		cooldown_timer.one_shot = true
 		cooldown_timer.timeout.connect(_on_timer_timeout)
+		
+	reload_audio = get_node_or_null("ReloadAudio")
 		
 	emit_signal("ammo_changed", current_ammo)
 
@@ -101,6 +104,9 @@ func reload() -> void:
 		
 	is_reloading = true
 	emit_signal("reload_started")
+	
+	if reload_audio:
+		reload_audio.play()
 	
 	# Use a timer for reload
 	await get_tree().create_timer(reload_time).timeout

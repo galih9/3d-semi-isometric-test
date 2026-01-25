@@ -2,6 +2,7 @@ extends CharacterBody3D
 
 signal health_changed(current_hp, max_hp)
 signal player_died
+signal active_gun_changed(gun_node)
 
 # --- Configuration ---
 @export_group("Movement")
@@ -31,7 +32,10 @@ signal player_died
 @onready var camera: Camera3D = get_node_or_null("CameraPivot/Camera3D")
 
 # Gun system
+# Gun system
 var gun: Node3D = null
+var guns: Array[Node3D] = []
+var current_gun_index: int = 0
 var is_gun_equipped: bool = false
 
 # --- Camera State ---
@@ -53,8 +57,21 @@ func _ready() -> void:
 		push_warning("Camera setup not found! Make sure CameraPivot/Camera3D exists")
 	
 	# Setup gun
-	gun = get_node_or_null("Skeleton3D/arm-right/GunAttachPoint/Gun")
-	if gun:
+	# Setup guns
+	var gun_attach_point = get_node_or_null("Skeleton3D/arm-right/GunAttachPoint")
+	if gun_attach_point:
+		for child in gun_attach_point.get_children():
+			if child is Node3D:
+				guns.append(child)
+				child.visible = false
+	
+	# Set initial gun
+	if guns.size() > 0:
+		gun = guns[current_gun_index]
+		if is_gun_equipped:
+			gun.visible = true
+		emit_signal("active_gun_changed", gun)
+	elif gun: # Fallback if existing logic set 'gun' manually (unlikely with this change)
 		gun.visible = is_gun_equipped
 	
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -324,11 +341,33 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("reload"):
 		if is_gun_equipped and gun and gun.has_method("reload"):
 			gun.reload()
+			
+	# Quick Switch
+	if event.is_action_pressed("quick_switch"):
+		_switch_weapon()
 
 func _toggle_gun_mode() -> void:
 	is_gun_equipped = not is_gun_equipped
 	if gun:
 		gun.visible = is_gun_equipped
+
+func _switch_weapon() -> void:
+	if guns.size() <= 1:
+		return
+		
+	# Hide current
+	if gun:
+		gun.visible = false
+		
+	# Advance index
+	current_gun_index = (current_gun_index + 1) % guns.size()
+	gun = guns[current_gun_index]
+	
+	# Show new if mode is equipped
+	if is_gun_equipped:
+		gun.visible = true
+		
+	emit_signal("active_gun_changed", gun)
 
 func _setup_inputs() -> void:
 	if not InputMap.has_action("move_forward"): _add_key_action("move_forward", KEY_W)
@@ -338,6 +377,7 @@ func _setup_inputs() -> void:
 	if not InputMap.has_action("jump"): _add_key_action("jump", KEY_SPACE)
 	if not InputMap.has_action("sprint"): _add_key_action("sprint", KEY_SHIFT)
 	if not InputMap.has_action("reload"): _add_key_action("reload", KEY_R)
+	if not InputMap.has_action("quick_switch"): _add_key_action("quick_switch", KEY_Q)
 
 func _add_key_action(action_name: String, key_code: int) -> void:
 	InputMap.add_action(action_name)

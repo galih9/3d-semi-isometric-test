@@ -44,13 +44,12 @@ func _ready() -> void:
 		# Try to find gun on player
 		# Assuming structure: Player -> ... -> Gun
 		# Or check member variable 'gun' in player script
+		# Connect to gun change signal
+		if player.has_signal("active_gun_changed"):
+			player.active_gun_changed.connect(_on_active_gun_changed)
+			
 		if "gun" in player and player.gun:
-			gun = player.gun
-			if gun.has_signal("ammo_changed"):
-				gun.ammo_changed.connect(_on_ammo_changed)
-			# Initial update
-			if "current_ammo" in gun:
-				_on_ammo_changed(gun.current_ammo)
+			_on_active_gun_changed(player.gun)
 		
 		# Initial HP update
 		if "current_hp" in player and "max_hp" in player:
@@ -100,3 +99,15 @@ func _on_player_died() -> void:
 func _on_restart_pressed() -> void:
 	get_tree().paused = false
 	get_tree().reload_current_scene()
+
+func _on_active_gun_changed(new_gun: Node3D) -> void:
+	if gun and gun.has_signal("ammo_changed") and gun.ammo_changed.is_connected(_on_ammo_changed):
+		gun.ammo_changed.disconnect(_on_ammo_changed)
+	
+	gun = new_gun
+	
+	if gun:
+		if gun.has_signal("ammo_changed"):
+			gun.ammo_changed.connect(_on_ammo_changed)
+		if "current_ammo" in gun:
+			_on_ammo_changed(gun.current_ammo)

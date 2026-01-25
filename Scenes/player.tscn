@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://iwsato2uxrlv" path="res://Scripts/player.gd" id="1_6t5aa"]
 [ext_resource type="Texture2D" uid="uid://b5uohb1lwlqhh" path="res://Asset/Textures/colormap.png" id="1_cvnsp"]
 [ext_resource type="PackedScene" uid="uid://bqporps6s78hu" path="res://Scenes/gun.tscn" id="2_6t5aa"]
+[ext_resource type="PackedScene" uid="uid://b1t4sk514vdr3" path="res://Scenes/gun-spray.tscn" id="3_spray"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_c204s"]
 resource_name = "colormap"
@@ -1995,6 +1996,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
 
 [node name="Gun" parent="Skeleton3D/arm-right/GunAttachPoint" instance=ExtResource("2_6t5aa")]
 transform = Transform3D(-1, -3.821371e-15, -8.742278e-08, -8.742278e-08, 4.371139e-08, 1, 0, 1, -4.371139e-08, 0.006919682, -0.1017807, 0.1796239)
+
+[node name="SprayGun" parent="Skeleton3D/arm-right/GunAttachPoint" instance=ExtResource("3_spray")]
+transform = Transform3D(-1, -3.821371e-15, -8.742278e-08, -8.742278e-08, 4.371139e-08, 1, 0, 1, -4.371139e-08, 0.006919682, -0.1017807, 0.1796239)
+visible = false
 
 [node name="head" type="BoneAttachment3D" parent="Skeleton3D"]
 transform = Transform3D(0.9886187, 0, 0.15044321, -0.0075699403, 0.9987333, 0.04974491, -0.15025264, -0.050317593, 0.9873664, 0, 0.49968332, -0.012579398)

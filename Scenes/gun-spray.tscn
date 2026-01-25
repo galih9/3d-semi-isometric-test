@@ -1,10 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://bqporps6s78hu"]
+[gd_scene load_steps=8 format=3 uid="uid://b1t4sk514vdr3"]
 
-[ext_resource type="PackedScene" uid="uid://b8d8mf1g1vdc5" path="res://Asset/Guns/blaster-b.glb" id="1_nxj5y"]
-[ext_resource type="Script" uid="uid://c3xb5ligyglb4" path="res://Scripts/gun.gd" id="3_gun_script"]
-[ext_resource type="SpriteFrames" uid="uid://dbv3sy5qjatnl" path="res://Asset/Guns/Sprites/burst_animation.tres" id="3_t6ynv"]
-[ext_resource type="AudioStream" uid="uid://cytgskcl543cm" path="res://Asset/Audio/pistol_shoot.ogg" id="4_k4teu"]
-[ext_resource type="AudioStream" uid="uid://bicpgv0x3c3kj" path="res://Asset/Audio/slow-pistol-reload-sound-fx_E_minor.ogg" id="5_reload_fx"]
+[ext_resource type="Script" uid="uid://c3xb5ligyglb4" path="res://Scripts/gun.gd" id="1_cdnw5"]
+[ext_resource type="PackedScene" uid="uid://b15d4fou2b7ah" path="res://Asset/Guns/blaster-d.glb" id="2_cdnw5"]
+[ext_resource type="SpriteFrames" uid="uid://dbv3sy5qjatnl" path="res://Asset/Guns/Sprites/burst_animation.tres" id="3_2okcr"]
+[ext_resource type="AudioStream" uid="uid://cytgskcl543cm" path="res://Asset/Audio/pistol_shoot.ogg" id="4_mcfuo"]
+[ext_resource type="AudioStream" uid="uid://bicpgv0x3c3kj" path="res://Asset/Audio/slow-pistol-reload-sound-fx_E_minor.ogg" id="5_fdlnx"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_laser"]
 transparency = 1
@@ -19,18 +19,20 @@ top_radius = 0.005
 bottom_radius = 0.005
 height = 1.0
 
-[node name="Gun" type="Node3D"]
-script = ExtResource("3_gun_script")
+[node name="SprayGun" type="Node3D"]
+script = ExtResource("1_cdnw5")
+fire_rate = 0.08
+clip_size = 60
 
-[node name="Blaster" parent="." instance=ExtResource("1_nxj5y")]
+[node name="blaster-d2" parent="." instance=ExtResource("2_cdnw5")]
 
 [node name="Muzzle" type="Marker3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.25868976)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.051402554, -0.43069386)
 
 [node name="MuzzleFlash" type="AnimatedSprite3D" parent="Muzzle"]
 transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, -0.02237451)
 billboard = 1
-sprite_frames = ExtResource("3_t6ynv")
+sprite_frames = ExtResource("3_2okcr")
 frame = 2
 frame_progress = 1.0
 
@@ -44,7 +46,7 @@ cast_shadow = 0
 mesh = SubResource("CylinderMesh_laser")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("4_k4teu")
+stream = ExtResource("4_mcfuo")
 
 [node name="Timer" type="Timer" parent="."]
 
@@ -52,4 +54,4 @@ stream = ExtResource("4_k4teu")
 wait_time = 3.0
 
 [node name="ReloadAudio" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("5_reload_fx")
+stream = ExtResource("5_fdlnx")
