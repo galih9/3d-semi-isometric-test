@@ -2,7 +2,7 @@ extends CharacterBody3D
 
 # --- Configuration ---
 @export var speed: float = 3.0
-@export var attack_range: float = 1.5
+@export var attack_range: float = 0.8
 @export var attack_damage: float = 10.0
 @export var attack_cooldown: float = 1.5
 @export var max_health: float = 100.0
