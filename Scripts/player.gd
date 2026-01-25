@@ -320,6 +320,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		else:
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
+	# Reload
+	if event.is_action_pressed("reload"):
+		if is_gun_equipped and gun and gun.has_method("reload"):
+			gun.reload()
+
 func _toggle_gun_mode() -> void:
 	is_gun_equipped = not is_gun_equipped
 	if gun:
@@ -332,6 +337,7 @@ func _setup_inputs() -> void:
 	if not InputMap.has_action("move_right"): _add_key_action("move_right", KEY_D)
 	if not InputMap.has_action("jump"): _add_key_action("jump", KEY_SPACE)
 	if not InputMap.has_action("sprint"): _add_key_action("sprint", KEY_SHIFT)
+	if not InputMap.has_action("reload"): _add_key_action("reload", KEY_R)
 
 func _add_key_action(action_name: String, key_code: int) -> void:
 	InputMap.add_action(action_name)

@@ -1884,7 +1884,7 @@ node_connections = [&"output", 0, &"Idle"]
 radius = 0.2626953
 height = 0.75231934
 
-[node name="Player" type="CharacterBody3D"]
+[node name="Player" type="CharacterBody3D" groups=["player"]]
 script = ExtResource("1_6t5aa")
 
 [node name="Skeleton3D" type="Skeleton3D" parent="."]
