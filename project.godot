@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="glb test"
-run/main_scene="uid://ct53stu488e60"
+run/main_scene="res://Scenes/MainMenu.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
