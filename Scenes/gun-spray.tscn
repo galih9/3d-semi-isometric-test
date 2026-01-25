@@ -23,6 +23,9 @@ height = 1.0
 script = ExtResource("1_cdnw5")
 fire_rate = 0.08
 clip_size = 60
+max_spread = 15.0
+spread_increase_per_shot = 1.0
+spread_recovery_speed = 30.0
 
 [node name="blaster-d2" parent="." instance=ExtResource("2_cdnw5")]
 

@@ -5,6 +5,11 @@ extends Node3D
 @export var bullet_scene: PackedScene
 @export var clip_size: int = 30
 @export var reload_time: float = 3.0
+@export var vertical_aim_bias: float = -2.0 # Degrees to pitch down
+@export_group("Spread")
+@export var max_spread: float = 0.0 # Degrees
+@export var spread_increase_per_shot: float = 0.0 # Degrees
+@export var spread_recovery_speed: float = 5.0 # Degrees per second
 
 signal ammo_changed(current_ammo)
 signal reload_started
@@ -23,6 +28,7 @@ var reload_audio: AudioStreamPlayer
 var can_shoot: bool = true
 var current_ammo: int = clip_size
 var is_reloading: bool = false
+var _current_spread: float = 0.0
 
 func _ready() -> void:
 	# Hide muzzle flash initially
@@ -46,6 +52,10 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	# Update Laser Sight
 	_update_laser()
+	
+	# Spread Recovery
+	if _current_spread > 0:
+		_current_spread = max(0.0, _current_spread - spread_recovery_speed * _delta)
 	
 	# Auto-reload if empty
 	if current_ammo <= 0 and not is_reloading:
@@ -71,10 +81,37 @@ func shoot(aim_direction: Vector3 = Vector3.ZERO, _aim_origin: Vector3 = Vector3
 	var start_pos = muzzle.global_position
 	
 	# Determine direction
+	# Determine direction
 	var dir = aim_direction
 	if dir == Vector3.ZERO:
 		# Fallback to muzzle forward
 		dir = - muzzle.global_transform.basis.z
+		
+	# Apply Vertical Bias (Pitch down/up)
+	# We construct a basis looking at 'dir' then rotate local X
+	var right = dir.cross(Vector3.UP).normalized()
+	if right == Vector3.ZERO: right = Vector3.RIGHT # Handle straight up/down
+	
+	dir = dir.rotated(right, deg_to_rad(vertical_aim_bias))
+	
+	# Apply Spread
+	if max_spread > 0:
+		var spread_angle = deg_to_rad(randf_range(0, _current_spread))
+		var spread_rot = randf_range(0, TAU) # Random rotation around forward axis
+		
+		# Rotate random amount around a random axis perpendicular to direction
+		# To do this robustly: Create a basis where Z is dir
+		var up = Vector3.UP
+		if abs(dir.dot(up)) > 0.99: up = Vector3.RIGHT
+		
+		var basis_aim = Basis.looking_at(dir, up)
+		# Local rotation: Tilt "up" by spread amount, then spin around Z
+		var spread_vector = Vector3.FORWARD.rotated(Vector3.RIGHT, spread_angle).rotated(Vector3.FORWARD, spread_rot)
+		# Transform to world space
+		dir = basis_aim * spread_vector
+		
+		# Increase spread
+		_current_spread = min(max_spread, _current_spread + spread_increase_per_shot)
 	
 	# Initialize bullet
 	if bullet.has_method("init"):
