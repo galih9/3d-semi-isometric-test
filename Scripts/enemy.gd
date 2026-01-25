@@ -23,6 +23,7 @@ var current_state: State = State.IDLE
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 func _ready() -> void:
+	add_to_group("enemies")
 	# Disable AnimationTree if it exists
 	var anim_tree = get_node_or_null("AnimationTree")
 	if anim_tree:
