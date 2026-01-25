@@ -30,4 +30,3 @@ content = re.sub(anim_player_pattern, anim_tree, content)
 with open(r'c:\Users\galih\Documents\Projects\Godot\glb-test\Scenes\player.tscn', 'w', encoding='utf-8') as f:
     f.write(content)
 
-print("Player scene modified successfully!")

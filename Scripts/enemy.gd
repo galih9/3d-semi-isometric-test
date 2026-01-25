@@ -46,9 +46,6 @@ func _find_target() -> void:
 	# Try name finding if group fails
 	if not target:
 		target = get_tree().root.find_child("Player", true, false)
-		
-	if name == "BigEnemy":
-		print("BigEnemy target search result: ", target)
 
 
 func _physics_process(delta: float) -> void:
@@ -66,18 +63,13 @@ func _physics_process(delta: float) -> void:
 	# State Machine Logic
 	match current_state:
 		State.IDLE:
-			if name == "BigEnemy" and Engine.get_physics_frames() % 60 == 0:
-				print("BigEnemy: IDLE. Target valid: ", is_instance_valid(target))
 			_process_idle(delta)
 		State.CHASE:
 			if name == "BigEnemy" and Engine.get_physics_frames() % 60 == 0:
 				var dist = global_position.distance_to(target.global_position)
 				var reach = nav_agent.is_target_reachable()
-				print("BigEnemy: CHASE. Dist: %.2f, Reachable: %s, Velocity: %s" % [dist, reach, velocity])
 			_process_chase(delta)
 		State.ATTACK:
-			if name == "BigEnemy" and Engine.get_physics_frames() % 60 == 0:
-				print("BigEnemy: ATTACKing")
 			_process_attack(delta)
 	
 	# Apply movement if valid velocity
@@ -87,10 +79,6 @@ func _physics_process(delta: float) -> void:
 			velocity.y -= _gravity * delta
 			
 		move_and_slide()
-		
-		if name == "BigEnemy" and Engine.get_physics_frames() % 60 == 0:
-			if velocity.length() < 0.1 and current_state == State.CHASE:
-				print("BigEnemy: STUCK? Velocity is near zero while in CHASE state.")
 
 
 func _process_idle(_delta: float) -> void:
@@ -115,7 +103,6 @@ func _process_chase(_delta: float) -> void:
 		return
 
 	if nav_agent.is_navigation_finished():
-		if name == "BigEnemy": print("BigEnemy: Navigation thinks it is finished.")
 		return
 
 	var next_path_pos = nav_agent.get_next_path_position()
