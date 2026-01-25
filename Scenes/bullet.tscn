@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://dyd3f3tg58d1e"]
 
 [ext_resource type="PackedScene" uid="uid://67e2pod6ptqn" path="res://Asset/Guns/bullet-foam-tip-thick.glb" id="1_xjght"]
-[ext_resource type="Script" path="res://Scripts/bullet.gd" id="2_bullet_script"]
+[ext_resource type="Script" uid="uid://dedf33y78u0od" path="res://Scripts/bullet.gd" id="2_bullet_script"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_bullet"]
 radius = 0.05
