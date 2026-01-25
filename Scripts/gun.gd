@@ -3,6 +3,12 @@ extends Node3D
 # --- Configuration ---
 @export var fire_rate: float = 0.2 # Time between shots in seconds
 @export var bullet_scene: PackedScene
+@export var clip_size: int = 30
+@export var reload_time: float = 3.0
+
+signal ammo_changed(current_ammo)
+signal reload_started
+signal reload_finished
 
 # --- Nodes ---
 @onready var muzzle: Marker3D = $Muzzle
@@ -14,6 +20,8 @@ extends Node3D
 
 # --- State ---
 var can_shoot: bool = true
+var current_ammo: int = clip_size
+var is_reloading: bool = false
 
 func _ready() -> void:
 	# Hide muzzle flash initially
@@ -29,14 +37,28 @@ func _ready() -> void:
 		cooldown_timer.wait_time = fire_rate
 		cooldown_timer.one_shot = true
 		cooldown_timer.timeout.connect(_on_timer_timeout)
+		
+	emit_signal("ammo_changed", current_ammo)
 
 func _process(_delta: float) -> void:
 	# Update Laser Sight
 	_update_laser()
+	
+	# Auto-reload if empty
+	if current_ammo <= 0 and not is_reloading:
+		reload()
 
 func shoot(aim_direction: Vector3 = Vector3.ZERO, _aim_origin: Vector3 = Vector3.ZERO) -> void:
-	if not can_shoot or not bullet_scene or not muzzle:
+	if not can_shoot or not bullet_scene or not muzzle or is_reloading:
 		return
+	
+	if current_ammo <= 0:
+		reload()
+		return
+		
+	# Consume ammo
+	current_ammo -= 1
+	emit_signal("ammo_changed", current_ammo)
 	
 	# Spawn bullet
 	var bullet = bullet_scene.instantiate()
@@ -72,6 +94,21 @@ func shoot(aim_direction: Vector3 = Vector3.ZERO, _aim_origin: Vector3 = Vector3
 
 func _on_timer_timeout() -> void:
 	can_shoot = true
+
+func reload() -> void:
+	if is_reloading or current_ammo == clip_size:
+		return
+		
+	is_reloading = true
+	emit_signal("reload_started")
+	
+	# Use a timer for reload
+	await get_tree().create_timer(reload_time).timeout
+	
+	current_ammo = clip_size
+	is_reloading = false
+	emit_signal("ammo_changed", current_ammo)
+	emit_signal("reload_finished")
 
 func _show_muzzle_flash() -> void:
 	if muzzle_flash:

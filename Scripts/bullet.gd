@@ -3,7 +3,7 @@ extends Area3D
 # --- Configuration ---
 @export var speed: float = 20.0
 @export var lifetime: float = 5.0
-@export var damage: float = 10.0
+@export var damage: float = 25.0
 
 # --- State ---
 var velocity: Vector3 = Vector3.ZERO

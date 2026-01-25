@@ -1,4 +1,7 @@
-extends Node3D
+extends CharacterBody3D
+
+signal health_changed(current_hp, max_hp)
+signal player_died
 
 # --- Configuration ---
 @export_group("Movement")
@@ -19,14 +22,13 @@ extends Node3D
 @export var vertical_limit: float = 15.0
 
 # --- Nodes ---
-@onready var character_body: CharacterBody3D = $CharacterBody3D
-@onready var anim_player: AnimationPlayer = $CharacterBody3D/AnimationPlayer
-@onready var anim_tree: AnimationTree = $CharacterBody3D/AnimationTree
-@onready var skeleton: Skeleton3D = $CharacterBody3D/Skeleton3D
+@onready var anim_player: AnimationPlayer = $AnimationPlayer
+@onready var anim_tree: AnimationTree = $AnimationTree
+@onready var skeleton: Skeleton3D = $Skeleton3D
 
 # Camera pivot nodes (will be set from player scene)
-var camera_pivot: Node3D = null
-var camera: Camera3D = null
+@onready var camera_pivot: Node3D = get_node_or_null("CameraPivot")
+@onready var camera: Camera3D = get_node_or_null("CameraPivot/Camera3D")
 
 # Gun system
 var gun: Node3D = null
@@ -40,19 +42,18 @@ var _camera_pitch: float = 0.0
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var _anim_playback: AnimationNodeStateMachinePlayback
 
+# --- Health State ---
+@export var max_hp: float = 100.0
+var current_hp: float = max_hp
+
 func _ready() -> void:
 	_setup_inputs()
 	
-	# Setup camera
-	camera_pivot = character_body.get_node_or_null("CameraPivot")
-	if camera_pivot:
-		camera = camera_pivot.get_node_or_null("Camera3D")
-	
 	if not camera or not camera_pivot:
-		push_warning("Camera setup not found! Make sure CharacterBody3D/CameraPivot/Camera3D exists")
+		push_warning("Camera setup not found! Make sure CameraPivot/Camera3D exists")
 	
 	# Setup gun
-	gun = character_body.get_node_or_null("Skeleton3D/arm-right/GunAttachPoint/Gun")
+	gun = get_node_or_null("Skeleton3D/arm-right/GunAttachPoint/Gun")
 	if gun:
 		gun.visible = is_gun_equipped
 	
@@ -60,6 +61,22 @@ func _ready() -> void:
 	
 	# Setup AnimationTree programmatically
 	_setup_animation_tree()
+	
+	# Emit initial health
+	call_deferred("emit_signal", "health_changed", current_hp, max_hp)
+
+func take_damage(amount: float) -> void:
+	current_hp -= amount
+	current_hp = clamp(current_hp, 0, max_hp)
+	emit_signal("health_changed", current_hp, max_hp)
+	
+	if current_hp <= 0:
+		die()
+
+func die() -> void:
+	emit_signal("player_died")
+	# Optional: Disable input or play animation logic here
+	# For now, UI Manager will handle the game over screen
 
 func _setup_animation_tree() -> void:
 	if not anim_tree:
@@ -147,16 +164,13 @@ func _setup_animation_tree() -> void:
 	_anim_playback = anim_tree.get("parameters/movement/playback")
 
 func _physics_process(delta: float) -> void:
-	if not character_body:
-		return
-
 	# Gravity
-	if not character_body.is_on_floor():
-		character_body.velocity.y -= _gravity * delta
+	if not is_on_floor():
+		velocity.y -= _gravity * delta
  
 	# Jump
-	if Input.is_action_just_pressed("jump") and character_body.is_on_floor():
-		character_body.velocity.y = jump_velocity
+	if Input.is_action_just_pressed("jump") and is_on_floor():
+		velocity.y = jump_velocity
  
 	# Movement input
 	var cam = get_viewport().get_camera_3d()
@@ -183,15 +197,15 @@ func _physics_process(delta: float) -> void:
 	var target_vel_x = direction.x * current_speed
 	var target_vel_z = direction.z * current_speed
 	
-	var accel = acceleration if character_body.is_on_floor() else acceleration * air_control
-	var fric = friction if character_body.is_on_floor() else friction * air_control
+	var accel = acceleration if is_on_floor() else acceleration * air_control
+	var fric = friction if is_on_floor() else friction * air_control
 	
 	if direction:
-		character_body.velocity.x = move_toward(character_body.velocity.x, target_vel_x, accel * delta)
-		character_body.velocity.z = move_toward(character_body.velocity.z, target_vel_z, accel * delta)
+		velocity.x = move_toward(velocity.x, target_vel_x, accel * delta)
+		velocity.z = move_toward(velocity.z, target_vel_z, accel * delta)
 	else:
-		character_body.velocity.x = move_toward(character_body.velocity.x, 0, fric * delta)
-		character_body.velocity.z = move_toward(character_body.velocity.z, 0, fric * delta)
+		velocity.x = move_toward(velocity.x, 0, fric * delta)
+		velocity.z = move_toward(velocity.z, 0, fric * delta)
 	
 	# Rotation Logic
 	if is_gun_equipped and cam:
@@ -214,12 +228,7 @@ func _physics_process(delta: float) -> void:
 				var current_angle = skeleton.rotation.y
 				skeleton.rotation.y = lerp_angle(current_angle, target_angle, rotation_speed * delta)
  
-	character_body.move_and_slide()
-	 
-	if character_body.position != Vector3.ZERO:
-		var target_global_pos = character_body.global_position
-		global_position = target_global_pos
-		character_body.position = Vector3.ZERO
+	move_and_slide()
 
 	# Camera Follow
 	_update_camera(direction, delta)
@@ -228,7 +237,12 @@ func _physics_process(delta: float) -> void:
 	_update_animations(direction)
 	
 	# Gun shooting
-	if is_gun_equipped and Input.is_action_pressed("shoot") and gun and gun.has_method("shoot"):
+	# Check if gun is present and not reloading (prevent animation if reloading)
+	var can_fire_gun = gun and gun.has_method("shoot")
+	if can_fire_gun and "is_reloading" in gun and gun.is_reloading:
+		can_fire_gun = false
+		
+	if is_gun_equipped and Input.is_action_pressed("shoot") and can_fire_gun:
 		# Calculate shooting direction (Camera Forward - Horizontal only)
 		# Use the flattened forward vector we calculated earlier for movement
 		gun.shoot(cam_forward_flat)
@@ -255,7 +269,12 @@ func _update_animations(direction: Vector3) -> void:
 			_anim_playback.travel("idle")
 	
 	# 2. Update Gun Blend (Arms)
-	if is_gun_equipped:
+	# Check for reloading state from gun directly
+	var is_reloading = false
+	if gun and "is_reloading" in gun:
+		is_reloading = gun.is_reloading
+
+	if is_gun_equipped and not is_reloading:
 		# Blend to 1.0 (Gun Pose)
 		# Smooth transition can be done by lerping, but AnimationTree handles set() instantly usually.
 		# For smooth blend, we rely on the node's internal filtering or manual tweening?
