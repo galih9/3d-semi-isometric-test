@@ -5,7 +5,7 @@ extends Node3D
 @export var bullet_scene: PackedScene
 @export var clip_size: int = 30
 @export var reload_time: float = 3.0
-@export var vertical_aim_bias: float = -2.0 # Degrees to pitch down
+@export var vertical_aim_bias: float = -10 # Degrees to pitch down
 @export_group("Spread")
 @export var max_spread: float = 0.0 # Degrees
 @export var spread_increase_per_shot: float = 0.0 # Degrees
@@ -61,7 +61,7 @@ func _process(_delta: float) -> void:
 	if current_ammo <= 0 and not is_reloading:
 		reload()
 
-func shoot(aim_direction: Vector3 = Vector3.ZERO, _aim_origin: Vector3 = Vector3.ZERO) -> void:
+func shoot(aim_direction: Vector3 = Vector3.ZERO, _aim_origin: Vector3 = Vector3.ZERO,camera_pitch: float = 0.0) -> void:
 	if not can_shoot or not bullet_scene or not muzzle or is_reloading:
 		return
 	
@@ -92,7 +92,8 @@ func shoot(aim_direction: Vector3 = Vector3.ZERO, _aim_origin: Vector3 = Vector3
 	var right = dir.cross(Vector3.UP).normalized()
 	if right == Vector3.ZERO: right = Vector3.RIGHT # Handle straight up/down
 	
-	dir = dir.rotated(right, deg_to_rad(vertical_aim_bias))
+	var combined_pitch = vertical_aim_bias + camera_pitch
+	dir = dir.rotated(right, deg_to_rad(combined_pitch))
 	
 	# Apply Spread
 	if max_spread > 0:

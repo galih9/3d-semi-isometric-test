@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://bqporps6s78hu"]
+[gd_scene load_steps=8 format=3 uid="uid://bqporps6s78hu"]
 
 [ext_resource type="PackedScene" uid="uid://b8d8mf1g1vdc5" path="res://Asset/Guns/blaster-b.glb" id="1_nxj5y"]
 [ext_resource type="Script" uid="uid://c3xb5ligyglb4" path="res://Scripts/gun.gd" id="3_gun_script"]
@@ -8,10 +8,13 @@
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_laser"]
 transparency = 1
+blend_mode = 1
+cull_mode = 2
+depth_draw_mode = 2
+no_depth_test = true
+shading_mode = 0
 albedo_color = Color(1, 0, 0, 0.470588)
-emission_enabled = true
-emission = Color(1, 0, 0, 1)
-emission_energy_multiplier = 5.0
+disable_receive_shadows = true
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_laser"]
 material = SubResource("StandardMaterial3D_laser")

@@ -5,7 +5,7 @@ extends CharacterBody3D
 @export var attack_range: float = 0.8
 @export var attack_damage: float = 10.0
 @export var attack_cooldown: float = 1.5
-@export var max_health: float = 200.0
+@export var max_health: float = 100.0
 
 # --- Nodes ---
 @onready var nav_agent: NavigationAgent3D = $NavigationAgent3D
@@ -13,7 +13,7 @@ extends CharacterBody3D
 # @onready var anim_tree: AnimationTree = $AnimationTree # If we use tree later
 
 # --- State ---
-var health: float = max_health
+var health: float # Will be initialized in _ready()
 var target: Node3D = null # The player
 var can_attack: bool = true
 var is_attacking: bool = false
@@ -23,6 +23,9 @@ var current_state: State = State.IDLE
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 func _ready() -> void:
+	# Initialize health from max_health (after inspector values are applied)
+	health = max_health
+	
 	add_to_group("enemies")
 	# Disable AnimationTree if it exists
 	var anim_tree = get_node_or_null("AnimationTree")
@@ -65,9 +68,6 @@ func _physics_process(delta: float) -> void:
 		State.IDLE:
 			_process_idle(delta)
 		State.CHASE:
-			if name == "BigEnemy" and Engine.get_physics_frames() % 60 == 0:
-				var dist = global_position.distance_to(target.global_position)
-				var reach = nav_agent.is_target_reachable()
 			_process_chase(delta)
 		State.ATTACK:
 			_process_attack(delta)

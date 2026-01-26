@@ -20,7 +20,7 @@ signal active_gun_changed(gun_node)
 @export var camera_angle: float = -45.0
 @export var camera_smoothness: float = 5.0
 @export var mouse_sensitivity: float = 0.3
-@export var vertical_limit: float = 15.0
+@export var vertical_limit: float = 10.0
 
 # --- Nodes ---
 @onready var anim_player: AnimationPlayer = $AnimationPlayer
@@ -30,6 +30,7 @@ signal active_gun_changed(gun_node)
 # Camera pivot nodes (will be set from player scene)
 @onready var camera_pivot: Node3D = get_node_or_null("CameraPivot")
 @onready var camera: Camera3D = get_node_or_null("CameraPivot/Camera3D")
+@onready var gun_attach_point: Node3D = get_node_or_null("Skeleton3D/arm-right/GunAttachPoint")
 
 # Gun system
 # Gun system
@@ -56,15 +57,11 @@ func _ready() -> void:
 	if not camera or not camera_pivot:
 		push_warning("Camera setup not found! Make sure CameraPivot/Camera3D exists")
 	
-	# Setup gun
-	# Setup guns
-	var gun_attach_point = get_node_or_null("Skeleton3D/arm-right/GunAttachPoint")
 	if gun_attach_point:
 		for child in gun_attach_point.get_children():
 			if child is Node3D:
 				guns.append(child)
 				child.visible = false
-	
 	# Set initial gun
 	if guns.size() > 0:
 		gun = guns[current_gun_index]
@@ -262,7 +259,7 @@ func _physics_process(delta: float) -> void:
 	if is_gun_equipped and Input.is_action_pressed("shoot") and can_fire_gun:
 		# Calculate shooting direction (Camera Forward - Horizontal only)
 		# Use the flattened forward vector we calculated earlier for movement
-		gun.shoot(cam_forward_flat)
+		gun.shoot(cam_forward_flat, Vector3.ZERO, _camera_pitch)
 		
 		# Trigger shoot animation
 		if anim_tree and anim_tree.active:
@@ -318,13 +315,18 @@ func _update_camera(_direction: Vector3, _delta: float) -> void:
 	var base_pitch = deg_to_rad(camera_angle)
 	var pitch_offset = deg_to_rad(_camera_pitch)
 	camera.rotation.x = base_pitch + pitch_offset
+	
+	# Update gun attach point rotation to follow camera pitch
+	if gun_attach_point:
+		gun_attach_point.rotation_degrees.x = -_camera_pitch +10
+		print(gun_attach_point.rotation_degrees.x)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_camera_yaw -= event.relative.x * mouse_sensitivity * 0.01
-		_camera_pitch -= event.relative.y * mouse_sensitivity * 0.01
-		
+		_camera_pitch -= event.relative.y * mouse_sensitivity * 0.1
 		_camera_pitch = clamp(_camera_pitch, -vertical_limit, vertical_limit)
+
 	
 	# Toggle gun/melee with action key (E)
 	if event.is_action_pressed("action"):
