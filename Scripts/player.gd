@@ -318,8 +318,7 @@ func _update_camera(_direction: Vector3, _delta: float) -> void:
 	
 	# Update gun attach point rotation to follow camera pitch
 	if gun_attach_point:
-		gun_attach_point.rotation_degrees.x = -_camera_pitch +10
-		print(gun_attach_point.rotation_degrees.x)
+		gun_attach_point.rotation_degrees.x = - _camera_pitch + 10
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:

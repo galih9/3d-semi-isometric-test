@@ -29,11 +29,11 @@ polygons = [PackedInt32Array(2, 1, 0), PackedInt32Array(0, 3, 2), PackedInt32Arr
 [node name="Test Level" type="Node3D"]
 script = ExtResource("6_gm")
 
-[node name="BigEnemy" parent="." instance=ExtResource("1_272bh")]
+[node name="BigEnemy" parent="." groups=["enemies"] instance=ExtResource("1_272bh")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.486776, 0.7946434, -13.709339)
 max_health = 1000.0
 
-[node name="Enemy" parent="." instance=ExtResource("2_lquwl")]
+[node name="Enemy" parent="." groups=["enemies"] instance=ExtResource("2_lquwl")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.17542171, -14.49284)
 
 [node name="Player" parent="." instance=ExtResource("1_1bvp3")]
