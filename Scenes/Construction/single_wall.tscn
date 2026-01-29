@@ -9,9 +9,9 @@ data = PackedVector3Array(0.099999994, 1, 0.5, 0.099999994, 1, -0.5, 0.099999994
 [node name="SingleWall" unique_id=1738359082 instance=ExtResource("1_sc377")]
 script = ExtResource("2_script")
 
-[node name="StaticBody3D" parent="wall" index="0"]
+[node name="StaticBody3D" type="StaticBody3D" parent="wall" index="0"]
 unique_id = 2017887736
 
-[node name="CollisionShape3D" parent="wall/StaticBody3D" index="0"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="wall/StaticBody3D" index="0"]
 unique_id = 1009102628
 shape = SubResource("ConcavePolygonShape3D_580tv")
