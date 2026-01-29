@@ -1,4 +1,4 @@
-[gd_resource type="MeshLibrary" load_steps=14 format=4 uid="uid://ugb65osnv3qp"]
+[gd_resource type="MeshLibrary" format=4 uid="uid://ugb65osnv3qp"]
 
 [ext_resource type="Texture2D" uid="uid://b5uohb1lwlqhh" path="res://Asset/Textures/colormap.png" id="1_hs5ws"]
 

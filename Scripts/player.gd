@@ -20,7 +20,7 @@ signal active_gun_changed(gun_node)
 @export var camera_angle: float = -45.0
 @export var camera_smoothness: float = 5.0
 @export var mouse_sensitivity: float = 0.3
-@export var vertical_limit: float = 10.0
+@export var vertical_limit: float = 5.0
 
 # --- Nodes ---
 @onready var anim_player: AnimationPlayer = $AnimationPlayer
@@ -178,6 +178,9 @@ func _setup_animation_tree() -> void:
 	_anim_playback = anim_tree.get("parameters/movement/playback")
 
 func _physics_process(delta: float) -> void:
+	if is_frozen:
+		return
+
 	# Gravity
 	if not is_on_floor():
 		velocity.y -= _gravity * delta
@@ -321,6 +324,12 @@ func _update_camera(_direction: Vector3, _delta: float) -> void:
 		gun_attach_point.rotation_degrees.x = - _camera_pitch + 10
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_frozen:
+		# Still allow unlocking mouse with Escape for safety?
+		if event.is_action_pressed("ui_cancel"):
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		return
+
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_camera_yaw -= event.relative.x * mouse_sensitivity * 0.01
 		_camera_pitch -= event.relative.y * mouse_sensitivity * 0.1
@@ -377,7 +386,6 @@ func _setup_inputs() -> void:
 	if not InputMap.has_action("move_right"): _add_key_action("move_right", KEY_D)
 	if not InputMap.has_action("jump"): _add_key_action("jump", KEY_SPACE)
 	if not InputMap.has_action("sprint"): _add_key_action("sprint", KEY_SHIFT)
-	if not InputMap.has_action("reload"): _add_key_action("reload", KEY_R)
 	if not InputMap.has_action("quick_switch"): _add_key_action("quick_switch", KEY_Q)
 
 func _add_key_action(action_name: String, key_code: int) -> void:
@@ -385,3 +393,14 @@ func _add_key_action(action_name: String, key_code: int) -> void:
 	var ev = InputEventKey.new()
 	ev.physical_keycode = key_code
 	InputMap.action_add_event(action_name, ev)
+
+# --- Freeze State for Build Mode ---
+var is_frozen: bool = false
+
+func set_frozen(frozen: bool) -> void:
+	is_frozen = frozen
+	if is_frozen:
+		velocity = Vector3.ZERO
+		# Optional: Reset animations to idle
+		if _anim_playback:
+			_anim_playback.travel("idle")

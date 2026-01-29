@@ -2,6 +2,7 @@ extends Node3D
 
 # Store enemy spawn data: { "scene_path": String, "transform": Transform3D }
 var initial_enemies_data: Array = []
+@onready var build_camera = %BuildCamera
 
 func _ready() -> void:
 	# Wait one frame to ensure all enemies are initialized and in the group
@@ -22,6 +23,8 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("slot1"): # Key 1
 		print("GameManager: Respawning enemies...")
 		respawn_enemies()
+	if event.is_action_pressed("build_mode"):
+		build_camera.current = !build_camera.current
 
 func respawn_enemies() -> void:
 	# 1. Remove existing enemies
