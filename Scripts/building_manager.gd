@@ -13,6 +13,15 @@ var current_ghost: Node3D = null
 var current_scene_to_build: PackedScene = null
 var active_build_mode: bool = false
 
+# Grid Data System
+# Stores occupied positions. Key: Vector3i (grid coord), Value: Node (or true)
+var occupied_cells: Dictionary = {}
+const GRID_PRECISION: float = 2.0 # Multiplier to convert 0.5 steps to integers.
+# Floor (0,0,0) -> 0,0,0. Wall (0.5, 0, 0) -> 1,0,0. (If we use *2)
+# Grid Size is 1.0. Wall offsets are 0.5.
+# Keys will be Vector3i( round(pos.x * 2), round(pos.y * 2), round(pos.z * 2) )
+
+
 # Raycasting
 const RAY_LENGTH = 1000.0
 
@@ -30,6 +39,9 @@ func _ready() -> void:
 	
 	# Initial Setup
 	current_scene_to_build = floor_scene
+	
+	# Initialize Grid
+	call_deferred("_scan_existing_placements")
 
 func _process(_delta: float) -> void:
 	# Check if we should be active
@@ -149,7 +161,7 @@ func _handle_building_logic() -> void:
 				# Occupancy Check
 				# If we are building a WALL, we only care if another WALL is there. Floors don't matter.
 				var building_a_wall = (current_scene_to_build == wall_scene)
-				var is_occupied = _is_position_occupied(best_marker.global_position, hit_collider, building_a_wall)
+				var is_occupied = _is_position_occupied(snapped_transform, hit_collider, building_a_wall)
 				
 				if is_occupied:
 					print("Debug: Snap found but OCCUPIED (Red)")
@@ -171,7 +183,7 @@ func _handle_building_logic() -> void:
 			snapped_transform.origin = Vector3(snapped_x, snapped_y, snapped_z)
 			_found_snap = true
 			
-			if not _is_position_occupied(snapped_transform.origin):
+			if not _is_position_occupied(snapped_transform, hit_collider):
 				is_valid_placement = true
 			else:
 				is_valid_placement = false
@@ -207,7 +219,8 @@ func _handle_building_logic() -> void:
 			_found_snap = true
 			
 			# Check occupancy (Pass hit_collider to ignore the ground)
-			if not _is_position_occupied(snapped_transform.origin, hit_collider, true):
+			print("Debug: Calling occupancy check for Wall Grid Snap. Ignore: ", hit_collider.name if hit_collider else "NULL")
+			if not _is_position_occupied(snapped_transform, hit_collider, true):
 				is_valid_placement = true
 			else:
 				is_valid_placement = false
@@ -255,7 +268,7 @@ func _handle_building_logic() -> void:
 			var is_valid = false
 			if current_scene_to_build == floor_scene:
 				# Floor can be placed on grid if not occupied by another floor
-				if not _is_position_occupied(current_ghost.global_position, null, false):
+				if not _is_position_occupied(Transform3D(Basis(), current_ghost.global_position), null, false):
 					is_valid = true
 			
 			# Walls cannot be placed on grid fallback
@@ -299,16 +312,115 @@ func _find_collision_objects(node: Node, results: Array) -> void:
 	for child in node.get_children():
 		_find_collision_objects(child, results)
 
-func _is_position_occupied(pos: Vector3, ignored_collider: Object = null, checking_for_wall: bool = false) -> bool:
+func _is_position_occupied(ghost_transform: Transform3D, ignored_collider: Object = null, checking_for_wall: bool = false) -> bool:
 	var space_state = get_world_3d().direct_space_state
-	# Sphere check with small radius to see if a structure is already there
 	var params = PhysicsShapeQueryParameters3D.new()
-	var shape = SphereShape3D.new()
-	shape.radius = 0.25 # slightly larger for fuzzy match
-	params.shape = shape
-	params.transform = Transform3D(Basis(), pos)
-	params.collision_mask = 1 # Match construction layer
 	
+	# Default to Sphere if no ghost (fallback)
+	if not current_ghost:
+		var shape = SphereShape3D.new()
+		shape.radius = 0.25
+		params.shape = shape
+		params.transform = ghost_transform
+		return _check_params_occupancy(space_state, params, ignored_collider, checking_for_wall)
+	
+	var is_occupied = false
+	var shapes_found = []
+	
+	# We search children so offsets are relative to Ghost Root (Identity)
+	for child in current_ghost.get_children():
+		_find_collision_shapes_recursive(child, shapes_found, Transform3D())
+	
+	if shapes_found.size() > 0:
+		print("Debug: Validating Ghost with ", shapes_found.size(), " shapes.")
+		for item in shapes_found:
+			var shape = item["shape"]
+			var local_transform = item["transform"]
+			
+			# HANDLE CONCAVE SHAPES (Not supported in intersect_shape)
+			if shape is ConcavePolygonShape3D:
+				# Converting Concave to Box (AABB) for validation
+				var faces = shape.get_faces()
+				if faces.size() > 0:
+					var min_vec = faces[0]
+					var max_vec = faces[0]
+					for vertex in faces:
+						min_vec = min_vec.min(vertex)
+						max_vec = max_vec.max(vertex)
+					
+					var size = max_vec - min_vec
+					var center = (min_vec + max_vec) / 2.0
+					
+					var box = BoxShape3D.new()
+					box.size = size
+					
+					params.shape = box
+					# Adjust transform to include AABB center offset
+					params.transform = ghost_transform * local_transform * Transform3D(Basis(), center)
+				else:
+					# Empty concave shape? Skip or fallback.
+					print("Debug: Warning - Empty Concave Shape found. Skipping.")
+					continue
+			else:
+			# Use original Convex or Primitive shape
+				params.shape = shape
+				params.transform = ghost_transform * local_transform
+			
+			# SHRINK SHAPE SLIGHTLY (Optional now that we use Grid Data, but good for Physics check)
+			params.transform.basis = params.transform.basis.scaled(Vector3(0.95, 0.95, 0.95))
+			
+			if _check_params_occupancy(space_state, params, ignored_collider, checking_for_wall):
+				is_occupied = true
+				break
+	
+	else:
+		# Fallback if ghost has no collision shape helper
+		print("Debug: Warning - No CollisionShapes found in Ghost. using Fallback Sphere.")
+		var shape = SphereShape3D.new()
+		shape.radius = 0.25
+		params.shape = shape
+		params.transform = ghost_transform
+		return _check_params_occupancy(space_state, params, ignored_collider, checking_for_wall)
+	
+	return is_occupied
+
+# Helper to get unique grid key from world position
+func _get_cell_key(pos: Vector3) -> Vector3i:
+	# Grid Logic: 1.0 units. Walls at 0.5 offsets.
+	# We multiply by 2 to distinguish 0.0 and 0.5
+	return Vector3i(round(pos.x * 2.0), round(pos.y * 2.0), round(pos.z * 2.0))
+
+func _scan_existing_placements() -> void:
+	occupied_cells.clear()
+	# Scan parent for existing construction items
+	# This is a best-effort scan for pre-placed items
+	var parent_node = get_parent()
+	if not parent_node: return
+	
+	for child in parent_node.get_children():
+		# identifying construction items by script or group could be better,
+		# for now, let's assume if it has 'set_state' it's one of ours.
+		if child.has_method("set_state") and child != current_ghost:
+			var key = _get_cell_key(child.global_position)
+			occupied_cells[key] = child
+			print("Debug: Registered existing item at ", key)
+
+func _check_params_occupancy(space_state, params, ignored_collider, checking_for_wall) -> bool:
+	# First: Check Grid Data (Logic Check)
+	# We calculate the key for the position we are testing.
+	# params.transform.origin gives the world position of the shape center.
+	# For Walls, the shape center is the wall center.
+	# Note: This checks the specific shape center.
+	# The ghost root might be at (0,0), but a child shape might be at (0.5, 0).
+	# This is actually GOOD for multi-part objects!
+	var key = _get_cell_key(params.transform.origin)
+	if occupied_cells.has(key):
+		var occupier = occupied_cells[key]
+		if occupier != ignored_collider:
+			print("Debug: Validated by Grid Data! Blocked by ", occupier.name, " at ", key)
+			return true
+
+	# Second: Physics Check (Terrain/Obstacles)
 	if ignored_collider and ignored_collider is CollisionObject3D:
 		params.exclude = [ignored_collider.get_rid()]
 	
@@ -316,26 +428,50 @@ func _is_position_occupied(pos: Vector3, ignored_collider: Object = null, checki
 	
 	for hit in intersections:
 		var collider = hit.collider
+		if collider == ignored_collider: continue
+			
 		var root = _get_construction_root(collider)
-		
 		if root:
-			var root_path = root.scene_file_path.to_lower() if root.scene_file_path else ""
-			if checking_for_wall:
-				# Use scene file path for more robust check
-				if "wall" in root_path:
-					print("Debug: Blocked by WALL: ", root.name)
-					return true # Blocked by another Wall
-			else:
-				if "floor" in root_path:
-					return true # Blocked by another Floor
+			# If we hit a Construction Item, we generally rely on Grid Data.
+			# BUT: If the item was NOT in occupied_cells (e.g. slight misalignment or unregistered),
+			# we might want to respect physics.
+			# However, user says physics causes issues with neighbors.
+			# So we explicitly IGNORE ConstructionItems in Physics check if we trust Grid Data.
+			# Let's trust Grid Data for "Construction vs Construction".
+			continue
+		else:
+			# Hit Terrain/Rocks/Statics
+			print("Debug: Blocked by STATIC OBSTACLE: ", collider.name)
+			return true
+	
 	return false
+
+func _find_collision_shapes_recursive(node: Node, results: Array, parent_accumulated_transform: Transform3D = Transform3D()) -> void:
+	var current_transform = parent_accumulated_transform
+	if node is Node3D:
+		current_transform = parent_accumulated_transform * node.transform
+		
+	if node is CollisionShape3D:
+		results.append({
+			"shape": node.shape,
+			"transform": current_transform
+		})
+	
+	for child in node.get_children():
+		_find_collision_shapes_recursive(child, results, current_transform)
+
 
 func _place_object() -> void:
 	if current_ghost.has_meta("is_valid") and not current_ghost.get_meta("is_valid"):
 		return # Block placement if invalid
 		
 	var new_obj = current_scene_to_build.instantiate()
-	get_parent().add_child(new_obj) # Add to main scene root preferably
+	get_parent().add_child(new_obj)
 	new_obj.global_transform = current_ghost.global_transform
 	if new_obj.has_method("set_state"):
 		new_obj.set_state(ConstructionItemScript.State.PLACED)
+	
+	# Register to Grid Data
+	var key = _get_cell_key(new_obj.global_position)
+	occupied_cells[key] = new_obj
+	print("Debug: Placed and Registered at ", key)
