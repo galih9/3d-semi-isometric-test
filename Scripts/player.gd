@@ -31,6 +31,7 @@ signal active_gun_changed(gun_node)
 @onready var camera_pivot: Node3D = get_node_or_null("CameraPivot")
 @onready var camera: Camera3D = get_node_or_null("CameraPivot/Camera3D")
 @onready var gun_attach_point: Node3D = get_node_or_null("Skeleton3D/arm-right/GunAttachPoint")
+@onready var harvest_timer: Timer = %HarvestTimer
 
 # Gun system
 # Gun system
@@ -38,6 +39,7 @@ var gun: Node3D = null
 var guns: Array[Node3D] = []
 var current_gun_index: int = 0
 var is_gun_equipped: bool = false
+var is_harvesting: bool = false
 
 # --- Camera State ---
 var _camera_yaw: float = 0.0
@@ -103,13 +105,16 @@ func _setup_animation_tree() -> void:
 	var anim_idle = AnimationNodeAnimation.new(); anim_idle.animation = "idle"
 	var anim_walk = AnimationNodeAnimation.new(); anim_walk.animation = "walk"
 	var anim_sprint = AnimationNodeAnimation.new(); anim_sprint.animation = "sprint"
+	var anim_interact = AnimationNodeAnimation.new(); anim_interact.animation = "interact-right"
 	
 	sm.add_node("idle", anim_idle)
 	sm.add_node("walk", anim_walk)
 	sm.add_node("sprint", anim_sprint)
+	sm.add_node("interact-right", anim_interact)
 	sm.set_node_position("idle", Vector2(0, 0))
 	sm.set_node_position("walk", Vector2(200, 0))
 	sm.set_node_position("sprint", Vector2(400, 0))
+	sm.set_node_position("interact-right", Vector2(100, 100))
 	
 	# Simple transitions
 	var trans = AnimationNodeStateMachineTransition.new()
@@ -122,6 +127,13 @@ func _setup_animation_tree() -> void:
 	sm.add_transition("sprint", "walk", trans)
 	sm.add_transition("idle", "sprint", trans)
 	sm.add_transition("sprint", "idle", trans)
+	# Transitions for interact-right (harvesting)
+	sm.add_transition("idle", "interact-right", trans)
+	sm.add_transition("interact-right", "idle", trans)
+	sm.add_transition("walk", "interact-right", trans)
+	sm.add_transition("interact-right", "walk", trans)
+	sm.add_transition("sprint", "interact-right", trans)
+	sm.add_transition("interact-right", "sprint", trans)
 	
 	root.add_node("movement", sm)
 	root.set_node_position("movement", Vector2(-400, 0))
@@ -277,7 +289,9 @@ func _update_animations(direction: Vector3) -> void:
 	var is_sprinting = Input.is_action_pressed("sprint")
 	
 	if _anim_playback:
-		if is_moving:
+		if is_harvesting:
+			_anim_playback.travel("interact-right")
+		elif is_moving:
 			if is_sprinting:
 				_anim_playback.travel("sprint")
 			else:
@@ -355,7 +369,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Quick Switch
 	if event.is_action_pressed("quick_switch"):
 		_switch_weapon()
-
+	
+	if event.is_action_pressed("interact"):
+		is_harvesting = true
+		harvest_timer.start()
+		await harvest_timer.timeout
+		is_harvesting = false
+		
 func _toggle_gun_mode() -> void:
 	is_gun_equipped = not is_gun_equipped
 	if gun:

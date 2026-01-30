@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://bqporps6s78hu"]
+[gd_scene format=3 uid="uid://bqporps6s78hu"]
 
 [ext_resource type="PackedScene" uid="uid://b8d8mf1g1vdc5" path="res://Asset/Guns/blaster-b.glb" id="1_nxj5y"]
 [ext_resource type="Script" uid="uid://c3xb5ligyglb4" path="res://Scripts/gun.gd" id="3_gun_script"]
@@ -22,37 +22,37 @@ top_radius = 0.005
 bottom_radius = 0.005
 height = 1.0
 
-[node name="Gun" type="Node3D"]
+[node name="Gun" type="Node3D" unique_id=573570096]
 script = ExtResource("3_gun_script")
 
-[node name="Blaster" parent="." instance=ExtResource("1_nxj5y")]
+[node name="Blaster" parent="." unique_id=764960132 instance=ExtResource("1_nxj5y")]
 
-[node name="Muzzle" type="Marker3D" parent="."]
+[node name="Muzzle" type="Marker3D" parent="." unique_id=1064673607]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.25868976)
 
-[node name="MuzzleFlash" type="AnimatedSprite3D" parent="Muzzle"]
+[node name="MuzzleFlash" type="AnimatedSprite3D" parent="Muzzle" unique_id=796005045]
 transform = Transform3D(0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, -0.02237451)
 billboard = 1
 sprite_frames = ExtResource("3_t6ynv")
 frame = 2
 frame_progress = 1.0
 
-[node name="RayCast3D" type="RayCast3D" parent="Muzzle"]
+[node name="RayCast3D" type="RayCast3D" parent="Muzzle" unique_id=2003176011]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.007755041)
 target_position = Vector3(0, 0, -50)
 
-[node name="Laser" type="MeshInstance3D" parent="Muzzle"]
+[node name="Laser" type="MeshInstance3D" parent="Muzzle" unique_id=1220154157]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -1.0128187)
 cast_shadow = 0
 mesh = SubResource("CylinderMesh_laser")
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=750691129]
 stream = ExtResource("4_k4teu")
 
-[node name="Timer" type="Timer" parent="."]
+[node name="Timer" type="Timer" parent="." unique_id=678945618]
 
-[node name="ReloadTimer" type="Timer" parent="."]
+[node name="ReloadTimer" type="Timer" parent="." unique_id=1317622434]
 wait_time = 3.0
 
-[node name="ReloadAudio" type="AudioStreamPlayer" parent="."]
+[node name="ReloadAudio" type="AudioStreamPlayer" parent="." unique_id=2096952993]
 stream = ExtResource("5_reload_fx")

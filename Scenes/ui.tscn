@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://b8x7y605w4v3u"]
+[gd_scene format=3 uid="uid://b8x7y605w4v3u"]
 
 [ext_resource type="Script" uid="uid://umd0egaobqmc" path="res://Scripts/ui_manager.gd" id="1_manager"]
 
@@ -10,11 +10,11 @@ outline_color = Color(0, 0, 0, 1)
 outline_size = 1
 outline_color = Color(0, 0, 0, 1)
 
-[node name="UI" type="CanvasLayer"]
+[node name="UI" type="CanvasLayer" unique_id=1856102622]
 process_mode = 3
 script = ExtResource("1_manager")
 
-[node name="HUD" type="Control" parent="."]
+[node name="HUD" type="Control" parent="." unique_id=1803487214]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,7 +23,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="AmmoLabel" type="Label" parent="HUD"]
+[node name="AmmoLabel" type="Label" parent="HUD" unique_id=2107522861]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -41,7 +41,7 @@ text = "Ammo: 30 / 30"
 label_settings = SubResource("LabelSettings_qdvrb")
 horizontal_alignment = 2
 
-[node name="HPBar" type="ProgressBar" parent="HUD"]
+[node name="HPBar" type="ProgressBar" parent="HUD" unique_id=1905780610]
 layout_mode = 0
 offset_left = 20.0
 offset_top = 20.0
@@ -49,7 +49,7 @@ offset_right = 320.0
 offset_bottom = 50.0
 value = 100.0
 
-[node name="HPLabel" type="Label" parent="HUD/HPBar"]
+[node name="HPLabel" type="Label" parent="HUD/HPBar" unique_id=1168701166]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -60,22 +60,23 @@ text = "HP: 100 / 100"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="HUD"]
+[node name="VBoxContainer" type="VBoxContainer" parent="HUD" unique_id=429469906]
 layout_mode = 0
 offset_right = 1152.0
 offset_bottom = 648.0
 
-[node name="Label" type="Label" parent="HUD/VBoxContainer"]
+[node name="Label" type="Label" parent="HUD/VBoxContainer" unique_id=152473236]
 layout_mode = 2
 text = "Prototyping features
 Press 1 to respawn the enemy
 Press E to switch equip/unequip
 Press Q to switch weapons
+Press B to enter build mode, arrow left for floor arrow right for wall
 "
 label_settings = SubResource("LabelSettings_jxero")
 horizontal_alignment = 2
 
-[node name="PauseMenu" type="Control" parent="."]
+[node name="PauseMenu" type="Control" parent="." unique_id=44458048]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -84,7 +85,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ColorRect" type="ColorRect" parent="PauseMenu"]
+[node name="ColorRect" type="ColorRect" parent="PauseMenu" unique_id=1930777445]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -93,7 +94,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.501961)
 
-[node name="Label" type="Label" parent="PauseMenu"]
+[node name="Label" type="Label" parent="PauseMenu" unique_id=2113745637]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -110,7 +111,7 @@ theme_override_font_sizes/font_size = 48
 text = "PAUSED"
 horizontal_alignment = 1
 
-[node name="ResumeButton" type="Button" parent="PauseMenu"]
+[node name="ResumeButton" type="Button" parent="PauseMenu" unique_id=819223233]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -125,7 +126,7 @@ grow_horizontal = 2
 grow_vertical = 2
 text = "Resume"
 
-[node name="GameOverMenu" type="Control" parent="."]
+[node name="GameOverMenu" type="Control" parent="." unique_id=1122015374]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -134,7 +135,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="ColorRect" type="ColorRect" parent="GameOverMenu"]
+[node name="ColorRect" type="ColorRect" parent="GameOverMenu" unique_id=246575956]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -143,7 +144,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.3, 0, 0, 0.7)
 
-[node name="Label" type="Label" parent="GameOverMenu"]
+[node name="Label" type="Label" parent="GameOverMenu" unique_id=1053832988]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -160,7 +161,7 @@ theme_override_font_sizes/font_size = 64
 text = "GAME OVER"
 horizontal_alignment = 1
 
-[node name="RestartButton" type="Button" parent="GameOverMenu"]
+[node name="RestartButton" type="Button" parent="GameOverMenu" unique_id=1411561358]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5

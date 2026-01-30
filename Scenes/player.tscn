@@ -1,4 +1,4 @@
-[gd_scene load_steps=49 format=4 uid="uid://cg7ksch5fwadp"]
+[gd_scene format=4 uid="uid://cg7ksch5fwadp"]
 
 [ext_resource type="Script" uid="uid://iwsato2uxrlv" path="res://Scripts/player.gd" id="1_6t5aa"]
 [ext_resource type="Texture2D" uid="uid://b5uohb1lwlqhh" path="res://Asset/Textures/colormap.png" id="1_cvnsp"]
@@ -1876,7 +1876,6 @@ _data = {
 animation = &"idle"
 
 [sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_vgqql"]
-graph_offset = Vector2(-239.33865, -12.919495)
 nodes/Idle/node = SubResource("AnimationNodeAnimation_6t5aa")
 nodes/Idle/position = Vector2(-192, 144)
 node_connections = [&"output", 0, &"Idle"]
@@ -1885,10 +1884,10 @@ node_connections = [&"output", 0, &"Idle"]
 radius = 0.2626953
 height = 0.75231934
 
-[node name="Player" type="CharacterBody3D" groups=["player"]]
+[node name="Player" type="CharacterBody3D" unique_id=1540231232 groups=["player"]]
 script = ExtResource("1_6t5aa")
 
-[node name="Skeleton3D" type="Skeleton3D" parent="."]
+[node name="Skeleton3D" type="Skeleton3D" parent="." unique_id=939170749]
 bones/0/name = "figurine"
 bones/0/parent = -1
 bones/0/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
@@ -1922,114 +1921,115 @@ bones/4/parent = 1
 bones/4/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
 bones/4/enabled = true
 bones/4/position = Vector3(0, 0.25, 0)
-bones/4/rotation = Quaternion(0.002435913, 0, 0, 0.999997)
+bones/4/rotation = Quaternion(0, 0, 0, 1)
 bones/4/scale = Vector3(1, 1, 1)
 bones/5/name = "arm-left"
 bones/5/parent = 4
 bones/5/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.2, 5.6229803e-09)
 bones/5/enabled = true
 bones/5/position = Vector3(0.2, 0.2, 5.6229803e-09)
-bones/5/rotation = Quaternion(0.0073076705, 0, 0, 0.99997336)
+bones/5/rotation = Quaternion(0, 0, 0, 1)
 bones/5/scale = Vector3(1, 1, 1)
 bones/6/name = "arm-right"
 bones/6/parent = 4
 bones/6/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0.2, -2.945491e-09)
 bones/6/enabled = true
 bones/6/position = Vector3(-0.2, 0.2, -2.945491e-09)
-bones/6/rotation = Quaternion(0.0073076705, 0, 0, 0.99997336)
+bones/6/rotation = Quaternion(0, 0, 0, 1)
 bones/6/scale = Vector3(1, 1, 1)
 bones/7/name = "head"
 bones/7/parent = 4
 bones/7/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
 bones/7/enabled = true
 bones/7/position = Vector3(0, 0.25, 0)
-bones/7/rotation = Quaternion(0, -0.0073076705, 0, 0.99997336)
+bones/7/rotation = Quaternion(0, 0, 0, 1)
 bones/7/scale = Vector3(1, 1, 1)
 
-[node name="leg-left" type="BoneAttachment3D" parent="Skeleton3D"]
+[node name="leg-left" type="BoneAttachment3D" parent="Skeleton3D" unique_id=678507969]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1, 0.25, 1.4901883e-09)
 bone_name = "leg-left"
 bone_idx = 2
 
-[node name="leg-left" type="MeshInstance3D" parent="Skeleton3D/leg-left"]
+[node name="leg-left" type="MeshInstance3D" parent="Skeleton3D/leg-left" unique_id=816969496]
 mesh = SubResource("ArrayMesh_vyo17")
 skeleton = NodePath("")
 
-[node name="leg-right" type="BoneAttachment3D" parent="Skeleton3D"]
+[node name="leg-right" type="BoneAttachment3D" parent="Skeleton3D" unique_id=510232114]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1, 0.3, -1.8278732e-09)
 bone_name = "leg-right"
 bone_idx = 3
 
-[node name="leg-right" type="MeshInstance3D" parent="Skeleton3D/leg-right"]
+[node name="leg-right" type="MeshInstance3D" parent="Skeleton3D/leg-right" unique_id=919473905]
 mesh = SubResource("ArrayMesh_ubl8f")
 skeleton = NodePath("")
 
-[node name="torso" type="BoneAttachment3D" parent="Skeleton3D"]
-transform = Transform3D(1, 0, 0, 0, 0.99998814, -0.0048718117, 0, 0.0048718117, 0.99998814, 0, 0.25, 0)
+[node name="torso" type="BoneAttachment3D" parent="Skeleton3D" unique_id=405658886]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
 bone_name = "torso"
 bone_idx = 4
 
-[node name="torso" type="MeshInstance3D" parent="Skeleton3D/torso"]
+[node name="torso" type="MeshInstance3D" parent="Skeleton3D/torso" unique_id=330463094]
 mesh = SubResource("ArrayMesh_c878f")
 skeleton = NodePath("")
 
-[node name="arm-left" type="BoneAttachment3D" parent="Skeleton3D"]
-transform = Transform3D(1, 0, 0, 0, 0.9998101, -0.019486068, 0, 0.019486068, 0.9998101, 0.2, 0.44999763, 0.000974368)
+[node name="arm-left" type="BoneAttachment3D" parent="Skeleton3D" unique_id=646240190]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.45, 5.6229803e-09)
 bone_name = "arm-left"
 bone_idx = 5
 
-[node name="arm-left" type="MeshInstance3D" parent="Skeleton3D/arm-left"]
+[node name="arm-left" type="MeshInstance3D" parent="Skeleton3D/arm-left" unique_id=180128199]
 mesh = SubResource("ArrayMesh_qe6la")
 skeleton = NodePath("")
 
-[node name="arm-right" type="BoneAttachment3D" parent="Skeleton3D"]
-transform = Transform3D(1, 0, 0, 0, 0.9998101, -0.019486068, 0, 0.019486068, 0.9998101, -0.2, 0.44999763, 0.0009743594)
+[node name="arm-right" type="BoneAttachment3D" parent="Skeleton3D" unique_id=43183007]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0.45, -2.945491e-09)
 bone_name = "arm-right"
 bone_idx = 6
 
-[node name="arm-right" type="MeshInstance3D" parent="Skeleton3D/arm-right"]
+[node name="arm-right" type="MeshInstance3D" parent="Skeleton3D/arm-right" unique_id=742129208]
 mesh = SubResource("ArrayMesh_0mbce")
 skeleton = NodePath("")
 
-[node name="GunAttachPoint" type="Marker3D" parent="Skeleton3D/arm-right"]
+[node name="GunAttachPoint" type="Marker3D" parent="Skeleton3D/arm-right" unique_id=1956689620]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0)
 
-[node name="Gun" parent="Skeleton3D/arm-right/GunAttachPoint" instance=ExtResource("2_6t5aa")]
+[node name="Gun" parent="Skeleton3D/arm-right/GunAttachPoint" unique_id=831517749 instance=ExtResource("2_6t5aa")]
 transform = Transform3D(-1, -3.821371e-15, -8.742278e-08, -8.742278e-08, 4.371139e-08, 1, 0, 1, -4.371139e-08, 0.006919682, -0.1017807, 0.1796239)
 
-[node name="SprayGun" parent="Skeleton3D/arm-right/GunAttachPoint" instance=ExtResource("3_spray")]
+[node name="SprayGun" parent="Skeleton3D/arm-right/GunAttachPoint" unique_id=1788260356 instance=ExtResource("3_spray")]
 transform = Transform3D(-1, -3.821371e-15, -8.742278e-08, -8.742278e-08, 4.371139e-08, 1, 0, 1, -4.371139e-08, 0.006919682, -0.1017807, 0.1796239)
 visible = false
 
-[node name="head" type="BoneAttachment3D" parent="Skeleton3D"]
-transform = Transform3D(0.9998932, 0, -0.01461495, -7.1201284e-05, 0.99998814, -0.0048712916, 0.014614777, 0.0048718117, 0.9998813, 0, 0.49999702, 0.0012179529)
+[node name="head" type="BoneAttachment3D" parent="Skeleton3D" unique_id=1556273380]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 bone_name = "head"
 bone_idx = 7
 
-[node name="head" type="MeshInstance3D" parent="Skeleton3D/head"]
+[node name="head" type="MeshInstance3D" parent="Skeleton3D/head" unique_id=214697823]
 mesh = SubResource("ArrayMesh_etxhu")
 skeleton = NodePath("")
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-libraries = {
-&"": SubResource("AnimationLibrary_eo808")
-}
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=50987083]
+libraries/ = SubResource("AnimationLibrary_eo808")
 
-[node name="AnimationTree" type="AnimationTree" parent="."]
+[node name="AnimationTree" type="AnimationTree" parent="." unique_id=596667379]
 tree_root = SubResource("AnimationNodeBlendTree_vgqql")
 anim_player = NodePath("../AnimationPlayer")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=2086122572]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.36505127, 0)
 shape = SubResource("CapsuleShape3D_vgqql")
 
-[node name="RemoteTransform3D" type="RemoteTransform3D" parent="."]
+[node name="RemoteTransform3D" type="RemoteTransform3D" parent="." unique_id=2099466245]
 remote_path = NodePath("../CameraPivot")
 update_rotation = false
 
-[node name="CameraPivot" type="Node3D" parent="."]
+[node name="CameraPivot" type="Node3D" parent="." unique_id=1217853735]
 
-[node name="Camera3D" type="Camera3D" parent="CameraPivot"]
+[node name="Camera3D" type="Camera3D" parent="CameraPivot" unique_id=1946425373]
 transform = Transform3D(-1, 2.1073431e-08, -2.1073431e-08, 0, 0.7071068, 0.7071068, 2.980233e-08, 0.7071068, -0.7071068, 0, 4, -2)
 current = true
 fov = 60.0
+
+[node name="HarvestTimer" type="Timer" parent="." unique_id=2083896934]
+unique_name_in_owner = true

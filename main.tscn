@@ -1,14 +1,15 @@
 [gd_scene format=3 uid="uid://ct53stu488e60"]
 
 [ext_resource type="PackedScene" uid="uid://cg7ksch5fwadp" path="res://Scenes/player.tscn" id="1_1bvp3"]
-[ext_resource type="PackedScene" uid="uid://bdi20v63m4vc4" path="res://Scenes/big-enemy.tscn" id="1_272bh"]
-[ext_resource type="PackedScene" uid="uid://c73nuu0rhdner" path="res://Scenes/enemy.tscn" id="2_lquwl"]
 [ext_resource type="MeshLibrary" uid="uid://bnjkcmkudx475" path="res://Library/floors-library.tres" id="3_lquwl"]
 [ext_resource type="MeshLibrary" uid="uid://ugb65osnv3qp" path="res://Library/walls-library.tres" id="4_lquwl"]
 [ext_resource type="PackedScene" uid="uid://b8x7y605w4v3u" path="res://Scenes/ui.tscn" id="4_ui"]
 [ext_resource type="PackedScene" uid="uid://c5gll0id5rvyl" path="res://Library/Scenes/corner_wall.tscn" id="5_7mycd"]
 [ext_resource type="Script" uid="uid://c86gi163gm65a" path="res://Scripts/game_manager.gd" id="6_gm"]
-[ext_resource type="Script" path="res://Scripts/building_manager.gd" id="7_buildmgr"]
+[ext_resource type="Script" uid="uid://bsicc40axhdj6" path="res://Scripts/building_manager.gd" id="7_buildmgr"]
+[ext_resource type="PackedScene" uid="uid://bdi20v63m4vc4" path="res://Scenes/big-enemy.tscn" id="9_4c57u"]
+[ext_resource type="PackedScene" uid="uid://ckj3geq8oa56k" path="res://Scenes/tree.tscn" id="10_4c57u"]
+[ext_resource type="PackedScene" uid="uid://c73nuu0rhdner" path="res://Scenes/enemy.tscn" id="10_efxa6"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sun"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -29,13 +30,6 @@ polygons = [PackedInt32Array(2, 1, 0), PackedInt32Array(0, 3, 2), PackedInt32Arr
 
 [node name="Test Level" type="Node3D" unique_id=839520520]
 script = ExtResource("6_gm")
-
-[node name="BigEnemy" parent="." unique_id=1794780639 groups=["enemies"] instance=ExtResource("1_272bh")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.486776, 0.7946434, -13.709339)
-max_health = 1000.0
-
-[node name="Enemy" parent="." unique_id=1801826635 groups=["enemies"] instance=ExtResource("2_lquwl")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.17542171, -14.49284)
 
 [node name="Player" parent="." unique_id=553542295 instance=ExtResource("1_1bvp3")]
 unique_name_in_owner = true
@@ -84,6 +78,33 @@ script = ExtResource("7_buildmgr")
 
 [node name="BuildCamera" type="Camera3D" parent="." unique_id=311885619]
 unique_name_in_owner = true
-transform = Transform3D(0.49386558, 0.23935871, -0.8359451, 0.05113261, 0.9517088, 0.30271417, 0.8680336, -0.19224414, 0.4577772, -26.592312, 8.996291, 2.6796842)
+transform = Transform3D(0.49386558, 0.23935871, -0.8359451, 0.05113261, 0.9517088, 0.30271417, 0.8680336, -0.19224414, 0.4577772, -36.332027, 8.996291, 3.3378787)
 projection = 1
 size = 9.421209
+
+[node name="Tree" parent="." unique_id=1328862113 instance=ExtResource("10_4c57u")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1687665, 0, -13.301107)
+
+[node name="Tree2" parent="." unique_id=1451406044 instance=ExtResource("10_4c57u")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.55446005, 0, -13.301107)
+
+[node name="Tree3" parent="." unique_id=11765453 instance=ExtResource("10_4c57u")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.936784, 0, -13.301107)
+
+[node name="Tree4" parent="." unique_id=1191099931 instance=ExtResource("10_4c57u")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.7195644, 0, -12.200928)
+
+[node name="Tree5" parent="." unique_id=1051066082 instance=ExtResource("10_4c57u")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3360319, 0, -12.200928)
+
+[node name="Tree6" parent="." unique_id=1940501605 instance=ExtResource("10_4c57u")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3360319, 0, -15.638901)
+
+[node name="Tree7" parent="." unique_id=1620735522 instance=ExtResource("10_4c57u")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.7036057, 0, -15.638901)
+
+[node name="BigEnemy" parent="." unique_id=96605467 instance=ExtResource("9_4c57u")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 21.180971, 0, 0)
+
+[node name="Enemy" parent="." unique_id=1743581587 instance=ExtResource("10_efxa6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10.876788)
