@@ -1,15 +1,8 @@
 extends Node3D
 
 # --- Configuration ---
-@export var fire_rate: float = 0.2 # Time between shots in seconds
+@export var gun_data: GunData
 @export var bullet_scene: PackedScene
-@export var clip_size: int = 30
-@export var reload_time: float = 3.0
-@export var vertical_aim_bias: float = -10 # Degrees to pitch down
-@export_group("Spread")
-@export var max_spread: float = 0.0 # Degrees
-@export var spread_increase_per_shot: float = 0.0 # Degrees
-@export var spread_recovery_speed: float = 5.0 # Degrees per second
 
 signal ammo_changed(current_ammo)
 signal reload_started
@@ -26,11 +19,18 @@ var reload_audio: AudioStreamPlayer
 
 # --- State ---
 var can_shoot: bool = true
-var current_ammo: int = clip_size
+var current_ammo: int = 0
 var is_reloading: bool = false
 var _current_spread: float = 0.0
+var movement_spread_modifier: float = 0.0
 
 func _ready() -> void:
+	if not gun_data:
+		push_warning("Gun has no GunData assigned! Creating default.")
+		gun_data = GunData.new()
+		
+	current_ammo = gun_data.clip_size
+
 	# Hide muzzle flash initially
 	if muzzle_flash:
 		muzzle_flash.visible = false
@@ -41,7 +41,7 @@ func _ready() -> void:
 		
 	# Setup Timer
 	if cooldown_timer:
-		cooldown_timer.wait_time = fire_rate
+		cooldown_timer.wait_time = gun_data.fire_rate
 		cooldown_timer.one_shot = true
 		cooldown_timer.timeout.connect(_on_timer_timeout)
 		
@@ -50,19 +50,21 @@ func _ready() -> void:
 	emit_signal("ammo_changed", current_ammo)
 
 func _process(_delta: float) -> void:
+	if not gun_data: return
+	
 	# Update Laser Sight
 	_update_laser()
 	
 	# Spread Recovery
 	if _current_spread > 0:
-		_current_spread = max(0.0, _current_spread - spread_recovery_speed * _delta)
+		_current_spread = max(0.0, _current_spread - gun_data.spread_recovery * _delta)
 	
 	# Auto-reload if empty
 	if current_ammo <= 0 and not is_reloading:
 		reload()
 
-func shoot(aim_direction: Vector3 = Vector3.ZERO, _aim_origin: Vector3 = Vector3.ZERO,camera_pitch: float = 0.0) -> void:
-	if not can_shoot or not bullet_scene or not muzzle or is_reloading:
+func shoot(aim_direction: Vector3 = Vector3.ZERO, _aim_origin: Vector3 = Vector3.ZERO, camera_pitch: float = 0.0) -> void:
+	if not can_shoot or not bullet_scene or not muzzle or is_reloading or not gun_data:
 		return
 	
 	if current_ammo <= 0:
@@ -92,12 +94,13 @@ func shoot(aim_direction: Vector3 = Vector3.ZERO, _aim_origin: Vector3 = Vector3
 	var right = dir.cross(Vector3.UP).normalized()
 	if right == Vector3.ZERO: right = Vector3.RIGHT # Handle straight up/down
 	
-	var combined_pitch = vertical_aim_bias + camera_pitch
+	var combined_pitch = gun_data.vertical_aim_bias + camera_pitch
 	dir = dir.rotated(right, deg_to_rad(combined_pitch))
 	
 	# Apply Spread
-	if max_spread > 0:
-		var spread_angle = deg_to_rad(randf_range(0, _current_spread))
+	var total_spread = gun_data.base_spread + _current_spread + movement_spread_modifier
+	if total_spread > 0:
+		var spread_angle = deg_to_rad(randf_range(0, total_spread))
 		var spread_rot = randf_range(0, TAU) # Random rotation around forward axis
 		
 		# Rotate random amount around a random axis perpendicular to direction
@@ -112,11 +115,16 @@ func shoot(aim_direction: Vector3 = Vector3.ZERO, _aim_origin: Vector3 = Vector3
 		dir = basis_aim * spread_vector
 		
 		# Increase spread
-		_current_spread = min(max_spread, _current_spread + spread_increase_per_shot)
+		var max_add_spread = max(0.0, gun_data.max_spread - gun_data.base_spread)
+		_current_spread = min(max_add_spread, _current_spread + gun_data.spread_per_shot)
 	
 	# Initialize bullet
 	if bullet.has_method("init"):
 		bullet.init(start_pos, dir)
+		if "damage" in bullet:
+			bullet.damage = gun_data.damage
+		if "speed" in bullet:
+			bullet.speed = gun_data.bullet_speed
 	else:
 		# Fallback for old bullet scripts (compatibility)
 		bullet.global_transform = muzzle.global_transform
@@ -131,13 +139,14 @@ func shoot(aim_direction: Vector3 = Vector3.ZERO, _aim_origin: Vector3 = Vector3
 	# Start cooldown
 	can_shoot = false
 	if cooldown_timer:
+		cooldown_timer.wait_time = gun_data.fire_rate
 		cooldown_timer.start()
 
 func _on_timer_timeout() -> void:
 	can_shoot = true
 
 func reload() -> void:
-	if is_reloading or current_ammo == clip_size:
+	if is_reloading or not gun_data or current_ammo == gun_data.clip_size:
 		return
 		
 	is_reloading = true
@@ -147,9 +156,9 @@ func reload() -> void:
 		reload_audio.play()
 	
 	# Use a timer for reload
-	await get_tree().create_timer(reload_time).timeout
+	await get_tree().create_timer(gun_data.reload_time).timeout
 	
-	current_ammo = clip_size
+	current_ammo = gun_data.clip_size
 	is_reloading = false
 	emit_signal("ammo_changed", current_ammo)
 	emit_signal("reload_finished")

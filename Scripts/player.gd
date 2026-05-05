@@ -222,6 +222,10 @@ func _physics_process(delta: float) -> void:
 		cam_forward_flat = forward
 	 
 	var current_speed = sprint_speed if Input.is_action_pressed("sprint") else walk_speed
+	
+	# Apply weapon mobility multiplier
+	if is_gun_equipped and gun and "gun_data" in gun and gun.gun_data:
+		current_speed *= gun.gun_data.move_speed_multiplier
 	 
 	var target_vel_x = direction.x * current_speed
 	var target_vel_z = direction.z * current_speed
@@ -236,6 +240,11 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, fric * delta)
 		velocity.z = move_toward(velocity.z, 0, fric * delta)
 	
+	# Calculate and send movement penalty to gun
+	if is_gun_equipped and gun and "movement_spread_modifier" in gun and "gun_data" in gun and gun.gun_data:
+		var horizontal_speed = Vector2(velocity.x, velocity.z).length()
+		gun.movement_spread_modifier = horizontal_speed * gun.gun_data.movement_spread_penalty
+
 	# Rotation Logic
 	if is_gun_equipped and cam:
 		# Face Camera Look Direction (Strafing Mode)
@@ -396,6 +405,10 @@ func _switch_weapon() -> void:
 	# Show new if mode is equipped
 	if is_gun_equipped:
 		gun.visible = true
+		
+	# Update UI with current ammo
+	if gun and "current_ammo" in gun and gun.has_signal("ammo_changed"):
+		gun.emit_signal("ammo_changed", gun.current_ammo)
 		
 	emit_signal("active_gun_changed", gun)
 
